@@ -825,20 +825,6 @@ More history saving features
 
 #+end_src
 
-* Langtool
-:PROPERTIES:
-:CUSTOM_ID: langtool
-:END:
-
-#+begin_src emacs-lisp
-
-  (setq langtool-language-tool-jar "~/biblemacs/resources/LanguageTool-6.6/languagetool-commandline.jar")
- 
-  (use-package langtool
-      :ensure t
-      )
-#+end_src
-
 * Embrace
 :PROPERTIES:
 :CUSTOM_ID: embrace
@@ -896,15 +882,9 @@ More history saving features
     :ensure (:wait t))
 (setq sword-to-org-default-module "BSB")
 
-(add-to-list 'load-path (expand-file-name "~/biblemacs/lisp/"))
+(elpaca (framemove :repo "~/biblemacs/code/lisp/framemove"))
+(elpaca (sword-to-org :repo "~/biblemacs/code/lisp/sword-to-org"))
 
-(require 'framemove)
-(setq framemove-hook-into-windmove t)
-(require 'sword-to-org)
-(require 'org-novelist)
-(require 'read-aloud)
-(require 'sermon-index)
-(require 'sermon-create)
 #+end_src
 
 * Keybindings
@@ -929,18 +909,14 @@ More history saving features
 :CUSTOM_ID: intro
 :END:
 #+begin_src emacs-lisp
-  (use-package general
-    :ensure (:wait t)
-    :config
-    (general-evil-setup)
-
-    ;; set up 'SPC' as the global leader key
-    (general-create-definer bm/leader-keys
-      :states '(normal insert visual emacs)
-      :keymaps 'override
-      :prefix "SPC" ;; set leader
-      :global-prefix "C-SPC")) ;; access leader in insert mode
-
+(cua-mode t)
+(use-package general
+  :ensure (:wait t)
+  :config
+  (general-create-definer bm/leader-keys
+    :keymaps 'override
+    :prefix "M-SPC"))
+ 
 #+end_src
 ** A, B, D, F ,G
 :PROPERTIES:
@@ -984,7 +960,7 @@ More history saving features
   "gi" '(bm/inbox   :which-key "Inbox")
   "gn" '(bm/init    :which-key "Init")
   "go" '(bm/notes   :which-key "Notes")
-  "gp" '(bm/projects  :which-key "Projects")
+  "gp" '(bm/projects  :which-key "Projects"))
 
 
   
@@ -1090,7 +1066,7 @@ More history saving features
 :CUSTOM_ID: whisper
 :END:
 #+begin_src emacs-lisp
-  (load-file "~/biblemacs/lisp/whisper/whisper.el")
+  (load-file "~/biblemacs/code/lisp/whisper/whisper.el")
   (setq whisper-install-directory "~/.emacs.d/.cache"
         whisper-model "tiny"
         whisper-language "en"
@@ -1457,7 +1433,7 @@ For Psalms, open Psalms.org and jump to '** Psalm N' (singular) or verse if spec
 Handles books starting with numbers like '1 Corinthians' or '2 Kings'.
 After navigating, recenter so the found text is at the top of the buffer."
   (interactive)
-  (let* ((bible-directory "~/biblemacs/bible/")
+  (let* ((bible-directory "~/biblemacs/org/bible/")
          (input (read-string "Bible Reference (e.g., Genesis 1:27): "))
          (case-fold-search t)
          book chapter verse bible-file)
@@ -1513,7 +1489,7 @@ After navigating, recenter so the found text is at the top of the buffer."
   "Prompt for a file inside the /bible/ folder, a starting verse, and an ending verse, then create an Org link to the reference.
 If the file is Psalms.org, the link description should use 'Psalm' (singular) instead of 'Psalms'."
   (interactive)
-  (let* ((bible-dir "~/biblemacs/bible/")
+  (let* ((bible-dir "~/biblemacs/org/bible/")
          (files (directory-files bible-dir nil "\\.org$"))
          (books (mapcar (lambda (file)
                           (file-name-sans-extension file))
@@ -1537,7 +1513,7 @@ Handles full references (e.g., 'John 6:35'), chapters only (e.g., 'John 6'),
 and special handling for 'Psalm' or 'Psalms' linking to 'Psalms.org'.
 Description keeps the full region text."
   (interactive)
-  (let* ((bible-dir "~/biblemacs/bible/")
+  (let* ((bible-dir "~/biblemacs/org/bible/")
          (region-text (string-trim (buffer-substring-no-properties (region-beginning) (region-end))))
          ;; Match: Book + Chapter + optional :Verse + optional -Range
          (reference-regex "^\\([1-3]? ?[A-Za-z]+\\)\\s-+\\([0-9]+\\)\\(?::\\([0-9]+\\)\\)?\\(-[0-9]+\\)?$"))
@@ -1878,7 +1854,7 @@ Returns a plist with :book, :chapter, :start-verse, and :end-verse."
 :END:
 #+begin_src emacs-lisp
 
-    (defun bm/init    ()(interactive) (find-file "~/biblemacs/init.org"))
+    (defun bm/init    ()(interactive) (find-file "~/biblemacs/code/init.org"))
     (defun bm/projects  ()(interactive) (find-file "~/biblemacs/projects/"))
     (defun bm/init.el   ()(interactive) (find-file "~/.emacs.d/init.el"))
 

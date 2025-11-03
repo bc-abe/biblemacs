@@ -27,7 +27,7 @@ Or, run this in your terminal after cloning the repo:
 
 I'll have more stuff later, but that's what I have for now.
 
-Here are keybindings to start. Leader key is ~C-SPC~. So go a bible reference is ~Control + Spacebar~, then ~b~, and ~f~, put Acts 2:38. The ta-da! you should be at Acts 2:38.
+Here are keybindings to start. Leader key is ~Alt-SPC~. In Emacs, ~Alt~ is ~M~. So go a bible reference is ~Alt + Spacebar~, then ~b~, and ~f~, put Acts 2:38. The ta-da! you should be at Acts 2:38.
 
 Note: to use ~sword-insert-ref~ and other ~sword~ commands, install BibleTime.
 
