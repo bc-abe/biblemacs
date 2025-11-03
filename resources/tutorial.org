@@ -1,0 +1,11 @@
+#+TITLE: BibleMacs Tutorial
+
+* Key Bindings
+
+** Essential Commands
+- ~C-SPC f f~ : Find file
+- ~C-SPC b f~ : Find Bible book
+- ~C-SPC n n~ : New note
+- ~C-SPC i s~ : Start inductive study
+- ~C-SPC t t~ : Toggle theme
+

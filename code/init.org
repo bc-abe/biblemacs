@@ -1,0 +1,1885 @@
+#+PROPERTY: header-args:emacs-lisp :results silent :tangle ~/.emacs.d/init.el
+#+STARTUP: overview
+
+██████╗ ██╗██████╗ ██╗     ███████╗███╗   ███╗ █████╗  ██████╗███████╗
+██╔══██╗██║██╔══██╗██║     ██╔════╝████╗ ████║██╔══██╗██╔════╝██╔════╝
+██████╔╝██║██████╔╝██║     █████╗  ██╔████╔██║███████║██║     ███████╗
+██╔══██╗██║██╔══██╗██║     ██╔══╝  ██║╚██╔╝██║██╔══██║██║     ╚════██║
+██████╔╝██║██████╔╝███████╗███████╗██║ ╚═╝ ██║██║  ██║╚██████╗███████║
+╚═════╝ ╚═╝╚═════╝ ╚══════╝╚══════╝╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝╚══════╝
+                                                                      
+
+* Early-Init.el
+:PROPERTIES:
+:CUSTOM_ID: early-init-el
+:END:
+#+begin_src emacs-lisp :tangle ~/.emacs.d/early-init.el
+
+  ;; Example Elpaca early-init.el -*- lexical-binding: t; -*-
+
+  (setq package-enable-at-startup nil)
+
+  ;; Local Variables:
+  ;; no-byte-compile: t
+  ;; no-native-compile: t
+  ;; no-update-autoloads: t
+  ;; End:
+  
+#+end_src
+* Elpaca
+:PROPERTIES:
+:CUSTOM_ID: elpaca
+:END:
+This is the bootstrap code to load my package manager, Elpaca
+#+begin_src emacs-lisp
+;;; -*- lexical-binding: t -*-
+(defvar elpaca-installer-version 0.11)
+(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
+(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
+(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
+(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
+                              :ref nil :depth 1 :inherit ignore
+                              :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+                              :build (:not elpaca--activate-package)))
+(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+       (build (expand-file-name "elpaca/" elpaca-builds-directory))
+       (order (cdr elpaca-order))
+       (default-directory repo))
+  (add-to-list 'load-path (if (file-exists-p build) build repo))
+  (unless (file-exists-p repo)
+    (make-directory repo t)
+    (when (<= emacs-major-version 28) (require 'subr-x))
+    (condition-case-unless-debug err
+        (if-let* ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                  ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
+                                                  ,@(when-let* ((depth (plist-get order :depth)))
+                                                      (list (format "--depth=%d" depth) "--no-single-branch"))
+                                                  ,(plist-get order :repo) ,repo))))
+                  ((zerop (call-process "git" nil buffer t "checkout"
+                                        (or (plist-get order :ref) "--"))))
+                  (emacs (concat invocation-directory invocation-name))
+                  ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                        "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                  ((require 'elpaca))
+                  ((elpaca-generate-autoloads "elpaca" repo)))
+            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+          (error "%s" (with-current-buffer buffer (buffer-string))))
+      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+  (unless (require 'elpaca-autoloads nil t)
+    (require 'elpaca)
+    (elpaca-generate-autoloads "elpaca" repo)
+    (let ((load-source-file-function nil)) (load "./elpaca-autoloads"))))
+(add-hook 'after-init-hook #'elpaca-process-queues)
+(elpaca `(,@elpaca-order))
+
+            (elpaca elpaca-use-package
+                    ;; Enable use-package :ensure support for Elpaca.
+              (elpaca-use-package-mode))
+
+
+          (setq use-package-always-ensure t)
+
+
+(defun my/upgrade-non-elpaca-packages ()
+  "Upgrade all packages managed by package.el (not elpaca).
+Safely handles dependencies and provides detailed feedback."
+  (interactive)
+  (require 'package)
+  
+  ;; Refresh package archives
+  (message "Refreshing package archives...")
+  (package-refresh-contents)
+  
+  (let* ((elpaca-managed (when (boundp 'elpaca-order)
+                           ;; Get list of packages managed by elpaca
+                           (mapcar #'car (hash-table-keys elpaca--queued))))
+         (upgradable nil)
+         (upgraded nil)
+         (failed nil))
+    
+    ;; Find upgradable packages not managed by elpaca
+    (dolist (pkg package-alist)
+      (let* ((pkg-name (car pkg))
+             (pkg-desc (cadr pkg))
+             (pkg-version (package-desc-version pkg-desc)))
+        (unless (memq pkg-name elpaca-managed)
+          (when-let ((available (cadr (assq pkg-name package-archive-contents))))
+            (when (version-list-< pkg-version 
+                                  (package-desc-version available))
+              (push pkg-name upgradable))))))
+    
+    (if (not upgradable)
+        (message "No upgradable packages found (excluding elpaca-managed).")
+      
+      (message "Found %d package(s) to upgrade: %s" 
+               (length upgradable) 
+               (mapconcat #'symbol-name upgradable ", "))
+      
+      ;; Upgrade each package with error handling
+      (dolist (pkg upgradable)
+        (condition-case err
+            (progn
+              (message "Upgrading %s..." pkg)
+              ;; Install with dependencies
+              (package-install pkg)
+              (push pkg upgraded)
+              (message "✓ Successfully upgraded %s" pkg))
+          (error
+           (push (cons pkg (error-message-string err)) failed)
+           (message "✗ Failed to upgrade %s: %s" pkg (error-message-string err)))))
+      
+      ;; Summary
+      (message "\n--- Upgrade Summary ---")
+      (message "Upgraded: %d package(s)" (length upgraded))
+      (when upgraded
+        (message "  %s" (mapconcat #'symbol-name (reverse upgraded) ", ")))
+      (when failed
+        (message "Failed: %d package(s)" (length failed))
+        (dolist (f failed)
+          (message "  %s: %s" (car f) (cdr f))))
+      
+      ;; Clean up old versions
+      (when upgraded
+        (message "\nCleaning up old package versions...")
+        (package-autoremove)))))
+
+;; Optional: Auto-upgrade function with confirmation
+(defun my/upgrade-non-elpaca-packages-with-confirmation ()
+  "Upgrade non-elpaca packages after confirmation."
+  (interactive)
+  (when (yes-or-no-p "Upgrade all non-elpaca managed packages? ")
+    (my/upgrade-non-elpaca-packages)))
+#+end_src
+* Appearences
+:PROPERTIES:
+:CUSTOM_ID: appearences
+:END:
+** Basic
+:PROPERTIES:
+:CUSTOM_ID: basic
+:END:
+#+begin_src emacs-lisp
+
+  (setq-default
+   inhibit-startup-screen t               ; Disable start-up screen
+   inhibit-startup-message t              ; Disable startup message
+   inhibit-startup-echo-area-message t    ; Disable initial echo message
+   initial-scratch-message ""             ; Empty the initial *scratch* buffer
+   initial-buffer-choice t)               ; Open *scratch* buffer at init
+
+
+  (use-package visual-fill-column)
+  (scroll-bar-mode 0)
+  (menu-bar-mode 0)
+
+
+  (temp-buffer-resize-mode)
+  (setq temp-buffer-max-height 8)
+  (require 'uniquify)
+
+  (setq uniquify-buffer-name-style 'reverse
+        uniquify-separator " • "
+        uniquify-after-kill-buffer-p t
+        uniquify-ignore-buffers-re "^\\*")
+#+end_src
+** Theme & Font
+:PROPERTIES:
+:CUSTOM_ID: theme-font
+:END:
+#+begin_src emacs-lisp
+
+  (set-face-attribute 'variable-pitch nil :family "Lato" :height 1.4)
+  (set-face-attribute 'default nil :family "CaskaydiaCove NF" :height 130 )
+;(use-package autothemer)
+  (setq custom-theme-directory "~/biblemacs/code")
+    (load-theme 'biblemacs-dark t)
+  (window-divider-mode 1)
+  (setq window-divider-default-places t)
+ (set-face-attribute 'highlight nil :background "#fff" :foreground "#000")
+  					;  (add-hook 'org-mode-hook 'refresh-org-target-overlays)
+#+end_src
+** Modeline
+:PROPERTIES:
+:CUSTOM_ID: modeline
+:END:
+
+#+begin_src emacs-lisp
+
+(setq-default mode-line-format
+  '("%e"
+    mode-line-front-space
+    ;; mode-line-mule-info
+    ;; mode-line-client-mode
+    ;; mode-line-modified
+    ;; mode-line-remote
+    mode-line-frame-identification
+    " "
+    mode-line-buffer-identification
+    "  "
+    vc-mode
+    " "
+    ;; mode-line-modes
+    " "
+))
+#+end_src
+* History
+:PROPERTIES:
+:CUSTOM_ID: history
+:END:
+#+begin_src emacs-lisp
+  
+(defun unpropertize-kill-ring ()
+  (setq kill-ring (mapcar 'substring-no-properties kill-ring)))
+
+(add-hook 'kill-emacs-hook 'unpropertize-kill-ring)
+
+#+end_src
+
+More history saving features
+#+begin_src emacs-lisp
+  
+(require 'savehist)
+
+(setq kill-ring-max 50
+      history-length 50)
+
+(setq savehist-additional-variables
+      '(kill-ring
+        command-history
+        set-variable-value-history
+        custom-variable-history   
+        query-replace-history     
+        read-expression-history   
+        minibuffer-history        
+        read-char-history         
+        face-name-history         
+        bookmark-history
+        file-name-history))
+
+ (put 'minibuffer-history         'history-length 50)
+ (put 'file-name-history          'history-length 50)
+ (put 'set-variable-value-history 'history-length 25)
+ (put 'custom-variable-history    'history-length 25)
+ (put 'query-replace-history      'history-length 25)
+ (put 'read-expression-history    'history-length 25)
+ (put 'read-char-history          'history-length 25)
+ (put 'face-name-history          'history-length 25)
+ (put 'bookmark-history           'history-length 25)
+
+(setq history-delete-duplicates t)
+
+(let (message-log-max)
+  (savehist-mode))
+
+(setq save-place-file (expand-file-name "saveplace" user-emacs-directory)
+      save-place-forget-unreadable-files t)
+
+(save-place-mode 1)
+
+
+(setq backup-directory-alist `(("." . "~/.saves")))
+
+  (setq delete-old-versions t
+    kept-new-versions 6
+    kept-old-versions 2
+    version-control t)
+
+#+end_src
+* Basic UI 
+:PROPERTIES:
+:CUSTOM_ID: basic-ui
+:END:
+
+#+begin_src emacs-lisp
+
+  (setq blink-cursor-mode nil)
+  (setq olivetti-body-width 120)
+  (setq delete-by-moving-to-trash t)
+
+; (set-fringe-mode 10)
+  (tool-bar-mode -1)
+  (tooltip-mode -1)
+  (global-auto-revert-mode 1)
+
+  (require 'hl-line)
+
+  ;(global-hl-line-mode)
+
+  (use-package rainbow-delimiters
+    :hook (prog-mode . rainbow-delimiters-mode))
+
+  (use-package corfu
+   :ensure t
+   :config
+   
+ (setq corfu-cycle t                ; Enable cycling for `corfu-next/previous'
+       corfu-auto t                 ; Enable auto completion
+       corfu-auto-delay 60.0        ; Delay before auto-completion shows up
+       corfu-separator ?\s          ; Orderless field separator
+       corfu-quit-at-boundary nil   ; Never quit at completion boundary
+       corfu-quit-no-match t        ; Quit when no match
+       corfu-preview-current nil    ; Disable current candidate preview
+       corfu-preselect-first nil    ; Disable candidate preselection
+       corfu-on-exact-match nil     ; Configure handling of exact matches
+       corfu-echo-documentation nil ; Disable documentation in the echo area
+       corfu-scroll-margin 5)       ; Use scroll margin
+
+  (global-corfu-mode))
+
+     
+ (setq-default indent-tabs-mode nil        ; Stop using tabs to indent
+                tab-always-indent 'complete ; Indent first then try completions
+                tab-width 4)                ; Smaller width for tab characters
+
+ (setq-default select-enable-clipboard t) ; Merge system's and Emacs' clipboard
+ (setq-default use-short-answers t                     ; Replace yes/no prompts with y/n
+               confirm-nonexistent-file-or-buffer nil) ; Ok to visit non existent files
+           
+ (setq-default visible-bell nil             ; No visual bell      
+               ring-bell-function 'ignore)  ; No bell
+ 
+ (setq auto-save-list-file-prefix ; Prefix for generating auto-save-list-file-name
+       (expand-file-name ".auto-save-list/.saves-" user-emacs-directory)
+        auto-save-default t        ; Auto-save every buffer that visits a file
+        auto-save-timeout 20       ; Number of seconds between auto-save
+        auto-save-interval 200)    ; Number of keystrokes between auto-saves
+
+(use-package vc-backup
+  :ensure t)
+
+  (setq backup-directory-alist       ; File name patterns and backup directory names.
+        `(("." . ,(expand-file-name "backups" user-emacs-directory)))
+        make-backup-files t          ; Backup of a file the first time it is saved.
+        vc-make-backup-files t       ; No backup of files under version contr
+        backup-by-copying t          ; Don't clobber symlinks
+        version-control t            ; Version numbers for backup files
+        delete-old-versions t        ; Delete excess backup files silently
+        kept-old-versions 6          ; Number of old versions to keep
+        kept-new-versions 9          ; Number of new versions to keep
+        delete-by-moving-to-trash t) ; Delete files to trash
+
+  (setq-default scroll-conservatively 101       ; Avoid recentering when scrolling far
+                scroll-margin 2                 ; Add a margin when scrolling vertically
+                recenter-positions '(5 bottom)) ; Set re-centering positions
+
+          
+  (setq sentence-end-double-space nil)
+  (setq global-visual-line-mode t)
+  (setq scroll-margin 5)
+  (setq dired-listing-switches "-lX --group-directories-first")
+
+  (defvar my/dired-show-all-files nil
+    "Non-nil means Dired shows all files including dotfiles and backups.")
+
+  (defun my/toggle-dired-show-all-files ()
+    "Toggle visibility of all files (dotfiles, backups, etc.) in Dired,
+  including disabling/enabling `dired-omit-mode`."
+    (interactive)
+    (setq my/dired-show-all-files (not my/dired-show-all-files))
+    (setq dired-listing-switches
+          (if my/dired-show-all-files
+              "-al --group-directories-first"
+            "-l --group-directories-first"))
+    ;; Toggle dired-omit-mode accordingly
+    (if my/dired-show-all-files
+        (dired-omit-mode -1)
+      (dired-omit-mode 1))
+    (revert-buffer))
+
+  ;; Bind to `.` in dired-mode
+  (with-eval-after-load 'dired
+    (define-key dired-mode-map (kbd ".") #'my/toggle-dired-show-all-files))
+
+
+  (use-package which-key
+    :init (which-key-mode)
+    :diminish which-key-mode
+    :config
+  (setq which-key-idle-delay 0.5))
+
+  ;; Enable vertico
+  (use-package vertico
+    :init
+   (vertico-mode 1)
+   (setq vertico-resize t)
+   (setq vertico-cycle t))
+
+    ;; Optionally use the `orderless' completion style.
+  (use-package orderless
+    :init
+    ;; Configure a custom style dispatcher (see the Consult wiki)
+    (setq completion-styles '(orderless basic)
+          completion-category-defaults nil
+          completion-category-overrides '((file (styles partial-completion)))))
+  (use-package marginalia
+    :ensure t
+    :init
+  (marginalia-mode))
+  (use-package consult
+    :ensure t
+    :bind (("C-s" . consult-line)
+           ("C-c h" . consult-history)
+           ("C-c m" . consult-mode-command)
+           ("C-c k" . consult-kmacro)
+           ("M-y" . consult-yank-pop)
+           ("<help> a" . consult-apropos)
+           ;; M-c bindings in `goto-map'
+           ;; ("M-c e" . consult-compile-error)
+           ;; ("M-c f" . consult-flymake)
+           ;; ("M-c g" . consult-goto-line)
+           ;; ("M-c M-c" . consult-goto-line)
+           ;; ("M-c o" . consult-outline)
+           ;; ("M-c m" . consult-mark)
+           ;; ("M-c k" . conslt-global-mark)
+           ;; ("M-c i" . consult-imenu)
+           ;; ("M-c I" . consult-imenu-multi)
+           ;; ;; M-s bindings in  `search-map'
+           ("M-s d" . consult-find)
+           ("M-s D" . consult-locate)
+           ("M-s g" . consult-grep)
+           ("M-s G" . consult-git-grep)
+           ("M-s r" . consult-ripgrep)
+           ("M-s l" . consult-line)
+           ("M-s L" . consult-line-multi)
+           ("M-s m" . consult-multi-occur)
+           ("M-s k" . consult-keep-lines)
+           ("M-s u" . consult-focus-lines)
+           ;; Isearch integration
+           ("M-s e" . consult-isearch-history)
+           :map isearch-mode-map
+           ("M-e" . consult-isearch-history)
+           ("M-s e" . consult-isearch-history)
+           ("M-s l" . consult-line)
+           ("M-s L" . consult-line-multi))
+    :hook (completion-list-mode . consult-preview-at-point-mode))
+#+end_src 
+
+* Org
+:PROPERTIES:
+:CUSTOM_ID: org
+:END:
+** Basics
+:PROPERTIES:
+:CUSTOM_ID: basics
+:END:
+
+#+begin_src emacs-lisp
+
+  (setq org-src-block-faces t)
+  (setq org-fontify-quote-and-verse-blocks t)
+          (setq org-directory "~/biblemacs/")
+          (setq org-hide-block-startup nil
+                org-startup-folded "fold")
+
+              (setq org-link-frame-setup
+                '((vm . vm-visit-folder-other-frame)
+                  (vm-imap . vm-visit-imap-folder-other-frame)
+                  (gnus . org-gnus-no-new-news)
+                  (file . find-file)
+                  (wl . wl-other-frame)))
+        (setq org-return-follows-link t)
+          (setq org-src-fontify-natively t) ; Fontify source code blocks
+
+        (use-package olivetti)
+          (setq olivetti-body-width 90)
+
+        (use-package org-sticky-header)
+         (setq org-sticky-header-always-show-header nil)
+         (setq org-sticky-header-full-path 'reversed)
+         (setq org-sticky-header-heading-star "")
+         (setq org-sticky-header-outline-path-reversed-separator " // ")
+         (setq org-sticky-header-outline-path-separator " // ")
+
+           (defun er-auto-create-missing-dirs ()
+            (let ((target-dir (file-name-directory buffer-file-name)))
+              (unless (file-exists-p target-dir)
+                (make-directory target-dir t))))
+
+          (add-to-list 'find-file-not-found-functions #'er-auto-create-missing-dirs)
+
+        (setq org-indent-indentation-per-level 2
+              org-ellipsis " ..."
+              org-hide-leading-stars t
+              org-modern-hide-stars t)
+
+          (defun bm/org-mode-setup ()
+          (org-indent-mode)
+          (setq line-spacing -0.1)
+          (olivetti-mode 1 )
+          (visual-line-mode 1)
+          (evil-escape-mode 1)
+          (org-sticky-header-mode)
+          (evil-org-mode 1)
+          (org-appear-mode)
+           (lambda () (progn
+           (setq left-margin-width 10)
+           (setq right-margin-width 10)
+           (set-window-buffer nil (current-buffer)))))
+
+          (add-hook 'org-mode-hook #'bm/org-mode-setup)
+          ;; Turn on variable pitch fonts in Org Mode buffers
+          ;; Register hooks with org-present
+          ;; (require 'ob-hledger)
+
+          (defun set-default-font-height ()
+          (interactive)
+          (setq new-height (read-number "Enter the new font height: "))
+          (set-face-attribute 'default nil :height (* new-height 10)))
+
+          (setq org-babel-default-header-args '((:noweb . "yes")))
+          (setq org-hide-leading-stars nil) 
+
+          (org-babel-do-load-languages
+          'org-babel-load-languages
+          '((R . t)
+            (ditaa . t)
+            (css . t)
+            (dot . t)
+            (emacs-lisp . t)
+            (gnuplot . t)
+            (haskell . nil)
+            (latex . t)
+            (ocaml . nil)
+            (octave . t)
+            (python . t)
+            (ruby . t)
+            (sqlite . t)))
+
+
+  (setq-default org-src-fontify-natively t         ; Fontify code in code blocks.
+                org-adapt-indentation nil          ; Adaptive indentation
+                org-src-tab-acts-natively t        ; Tab acts as in source editing
+                org-confirm-babel-evaluate nil     ; No confirmation before executing code
+                org-edit-src-content-indentation 0 ; No relative indentation for code blocks
+                org-fontify-whole-block-delimiter-line t) ; Fontify whole block
+  
+ (use-package org-appear
+     :ensure t (:wait t))
+         #+end_src
+** Export
+:PROPERTIES:
+:CUSTOM_ID: export
+:END:
+
+#+begin_src emacs-lisp
+
+;; Export targets as raw IDs
+;; Export <<target>> as <a id="target"></a>
+
+(use-package ox-pandoc
+  :ensure t)
+;; Make sure links to .org files become .html
+(setq org-html-link-org-files-as-html t)
+(setq org-re-reveal-link-org-files-as-html t)
+
+   
+       
+   (setq org-export-with-broken-links t)
+   (setq org-html-html5-fancy t)
+   (setq org-html-htmlize-output-type nil)
+   (setq org-html-doctype "html5")
+   (setq org-html-container-element "div")
+   (setq org-html-head-include-default-style nil)
+   (setq org-footnote-define-inline t)
+   (setq
+     org-export-with-timestamps nil
+     org-export-with-toc nil
+     org-export-with-section nil
+     org-export-with-section-numbers nil
+     org-export-with-date nil
+     org-export-with-author nil
+     org-html-preamble nil
+     org-html-validation-link nil
+     org-html-postamble nil
+  	)
+  (setq org-html-postamble-format '(("en" "")))
+
+  (setq org-html-use-unicode-chars nil) ; optional, for cleaner output
+  (setq org-export-with-smart-quotes t)
+
+  ;; Disable property drawers from being exported as a <pre class="example"> 
+  (advice-add 'org-html-property-drawer :override (lambda (_property-drawer contents _info) ()))
+
+  ;;--verse2--;; 
+  (defun my/org-html-verse2-block (contents info)
+  "Export a verse2 block to HTML with line breaks preserved."
+  (let ((lines (split-string contents "\n")))
+  (format "<div class=\"verse2\">\n<p>%s</p>\n</div>"
+  (mapconcat (lambda (line) (concat line "<br />")) lines "\n"))))
+
+  (with-eval-after-load 'ox-html
+    (org-export-define-derived-backend 'my-html 'html
+      :translate-alist '((special-block . my/org-html-special-block))))
+
+  (defun my/org-html-special-block (special-block contents info)
+    "Custom handler for special blocks like verse2."
+    (let ((type (downcase (org-element-property :type special-block))))
+      (cond
+       ((string= type "verse2") (my/org-html-verse2-block contents info))
+       ;; fallback to default
+             (t (org-html-special-block special-block contents info)))))
+
+#+end_src
+
+** Org Link
+:PROPERTIES:
+:CUSTOM_ID: org-link
+:END:
+
+#+begin_src emacs-lisp
+
+  (org-add-link-type "html-class" #'ignore #'bm/html-class-link)
+  (defun bm/html-class-link (path desc format)
+    "Export org html-class links to HTML."
+    (cl-case format
+      (html (format "<span class=\"%s\">%s</span>" path (or desc "")))))
+
+  (org-add-link-type "html-style" #'ignore #'bm/html-style-link)
+  (defun bm/html-style-link (path desc format)
+    "Export org html-style links to HTML."
+    (cl-case format
+      (html (format "<span style=\"%s\">%s</span>" path (or desc "")))))
+
+#+end_src
+** Org-Re-Reveal
+:PROPERTIES:
+:CUSTOM_ID: org-re-reveal
+:END:
+#+begin_src emacs-lisp
+  (use-package org-re-reveal)
+  (setq org-re-reveal-root "../static/js/reveal.js/")
+  (setq org-re-reveal-pub-dir "../static/js/reveal.js/")
+  (setq org-re-reveal-control nil)
+  (setq org-re-reveal-default-frag-style "fade-up")
+  (setq org-re-reveal-title-slide t)
+  (setq org-re-reveal-transition "none")
+  (setq org-re-reveal-theme "2025slides")
+  (setq org-re-reveal-toc-footer nil )
+  (setq org-re-reveal-slide-number nil )
+  (setq org-re-reveal-control nil )
+  (setq org-re-reveal-progress nil )
+  (setq org-re-reveal-plugins '(zoom notes) )
+  (setq org-re-reveal-background-transition "none" )
+  (setq org-re-reveal-single-file nil )
+  (setq org-re-reveal-hlevel 0)
+  (setq org-reveal-hlevel 8)
+  (setq org-re-reveal-init-script "navigationMode: 'linear',\n ")
+  (setq org-export-with-properties nil)
+  (setq org-re-reveal-width 1920)
+  (setq org-re-reveal-history t) 
+  (setq org-re-reveal-height 1080)
+  (setq org-re-reveal-margin "0.1")
+  (setq org-re-reveal-extra-scripts '("../../../static/js/mynotes.js"))
+#+end_src
+** Org Structure Org Link
+:PROPERTIES:
+:CUSTOM_ID: org-structure-org-link
+:END:
+#+begin_src emacs-lisp
+  (setq org-link-file-path-type 'relative)
+  
+  (org-add-link-type "html-class" #'ignore #'bm/html-class)
+  (defun bm/html-class (path desc format)
+  (cl-case format
+    (html (format "<span class=\"%s\">%s</span>" path (or desc "")))
+    ))
+
+  (org-add-link-type "p style" #'ignore #'bm/p-style)
+  (defun bm/p-style (path desc format)
+  (cl-case format
+    (html (format "<p style=\"%s\">%s</p>" path (or  "")))
+   ))
+
+  (org-add-link-type "reveal-frag" #'ignore #'bm/reveal-frag)
+  (defun bm/reveal-frag (path desc format)
+  (cl-case format
+    (html (format "<span class=\"fragment %s\">%s</span>" path (or desc "")))
+    ))
+
+ (org-add-link-type "reveal-frag" #'ignore #'bm/reveal-frag)
+
+  (defun bm/reveal-frag (path desc format)
+    (cl-case format
+      (html
+       (let* ((parts (split-string path ":"))
+              (class (car parts))
+              (index (cadr parts)))
+         (if index
+             (format "<span class=\"fragment %s\" data-fragment-index=\"%s\">%s</span>"
+                     class index (or desc ""))
+           (format "<span class=\"fragment %s\">%s</span>"
+                   class (or desc "")))))))
+
+
+  (org-add-link-type "html-style" #'ignore #'bm/html-style)
+  (defun bm/html-style (path desc format)
+  (cl-case format
+    (html (format "<span style=\"%s\">%s</span>" path (or desc "")))
+    ))
+
+  (org-add-link-type "html-size" #'ignore #'bm/html-size-link)
+  (defun bm/html-size-link (path desc format)
+  (cl-case format
+    
+    (html (format "<span style=\"font-size:%sem\">%s</span>" path (or desc "")))
+    ))
+
+    (add-to-list 'org-structure-template-alist '("m" . "com"))
+    (add-to-list 'org-structure-template-alist '("t" . "text"))
+    (add-to-list 'org-structure-template-alist '("1" . "col1"))
+    (add-to-list 'org-structure-template-alist '("2" . "col2"))
+    (add-to-list 'org-structure-template-alist '("V" . "verse2"))
+    (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+#+end_src
+** Org Alist
+:PROPERTIES:
+:CUSTOM_ID: org-alist
+:END:
+#+begin_src emacs-lisp
+  
+(setq org-emphasis-alist
+      '(
+        ("*" (bold :slant italic :weight black :foreground "#c895a5")) ;; Magenta (was LOVE)
+        ("/" (italic :foreground "#7eb3b8")) ;; Cyan (was FOAM)
+        ("_" (underline :foreground "#dda788")) ;; Orange (was ROSE)
+        ("=" (:foreground "#e5c07b")) ;; Yellow (was GOLD)
+        ("+" (:strike-through nil :foreground "#95b599")))) ;; Green (was IRIS)
+
+    (setq org-hide-emphasis-markers t)
+#+end_src
+* Dired
+:PROPERTIES:
+:CUSTOM_ID: dired
+:END:
+
+#+begin_src emacs-lisp
+(use-package ranger
+  :ensure (:wait t))
+
+  (use-package all-the-icons-dired)
+    (add-hook 'dired-mode-hook 'dired-omit-mode)
+    (add-hook 'dired-mode-hook 'dired-hide-details-mode)
+    (setq global-tree-undo-mode t)
+    (use-package hide-mode-line)
+
+(use-package all-the-icons-nerd-fonts)
+
+#+end_src
+
+** Tab Bar
+:PROPERTIES:
+:CUSTOM_ID: tab-bar
+:END:
+
+#+begin_src emacs-lisp
+  ;; Enable tab-bar-mode
+  (setq tab-bar-show 1)
+  ;; Customize tab format to display heading of the file
+
+  (defun set-tab-name-to-buffer-name ()
+    "Set the tab name to the buffer name, or file name if in a file buffer."
+    (let ((name (if (buffer-file-name)
+                    (file-name-nondirectory (buffer-file-name))
+                  (buffer-name))))
+      (setq tab-bar-tab-name name)))
+
+  (add-hook 'buffer-list-update-hook #'set-tab-name-to-buffer-name)
+
+  ;; Set initial tab names
+  (set-tab-name-to-buffer-name)
+  
+
+#+end_src
+* Magit
+:PROPERTIES:
+:CUSTOM_ID: magit
+:END:
+#+begin_src emacs-lisp
+(elpaca transient)
+(elpaca (magit :wait t))
+#+end_src
+* UI
+:PROPERTIES:
+:CUSTOM_ID: ui
+:END:
+#+begin_src emacs-lisp
+
+  (setq bookmark-default-file "~/biblemacs/bookmarks")
+
+     ;; sets location for save-place-file
+     (setq save-place-file "~/biblemacs/saveplace")
+     ;; saves cursor location in each file
+     (save-place-mode 1)
+
+     ;; Visual Search and Replace
+      (use-package visual-regexp
+      :commands vr/replace)
+
+      (use-package company
+        :config
+        (add-hook 'after-init-hook 'global-company-mode))
+
+      (use-package flycheck
+        :config
+        (global-flycheck-mode))
+
+#+end_src
+
+* Langtool
+:PROPERTIES:
+:CUSTOM_ID: langtool
+:END:
+
+#+begin_src emacs-lisp
+
+  (setq langtool-language-tool-jar "~/biblemacs/resources/LanguageTool-6.6/languagetool-commandline.jar")
+ 
+  (use-package langtool
+      :ensure t
+      )
+#+end_src
+
+* Embrace
+:PROPERTIES:
+:CUSTOM_ID: embrace
+:END:
+
+#+begin_src emacs-lisp
+
+(use-package embrace
+:ensure t
+:config
+)
+
+(defun embrace-org-mode-hook ()
+  (dolist (list '((?= "=" . "=")
+                 (?~ "~" . "~")
+                 (?/ "/" . "/")
+                 (?* "*" . "*")
+                 (?_ "_" . "_")
+                 (?+ "+" . "+"))
+    (embrace-add-pair (car lst) (cadr lst) (cddr lst)))))
+
+(use-package embrace)
+(add-hook 'org-mode-hook 'embrace-org-mode-hook)
+
+#+end_src
+* FZF
+:PROPERTIES:
+:CUSTOM_ID: fzf
+:END:
+#+begin_src emacs-lisp
+(use-package fzf
+  :config
+  (setq fzf/args "-x --color bw --print-query --margin=1,0 --no-hscroll"
+        fzf/executable "fzf"
+        fzf/git-grep-args "-i --line-number %s"
+        ;; command used for `fzf-grep-*` functions
+        ;; example usage for ripgrep:
+        ;; fzf/grep-command "rg --no-heading -nH"
+        fzf/grep-command "grep -nrH"
+        ;; If nil, the fzf buffer will appear at the top of the window
+        fzf/position-bottom t
+        fzf/window-height 15))
+#+end_src
+* Local Packages
+:PROPERTIES:
+:CUSTOM_ID: local-packages
+:END:
+
+#+begin_src emacs-lisp
+;; dash and s are dependencies for sword-to-org
+(use-package dash
+    :ensure (:wait t))
+
+(use-package s
+    :ensure (:wait t))
+(setq sword-to-org-default-module "BSB")
+
+(add-to-list 'load-path (expand-file-name "~/biblemacs/lisp/"))
+
+(require 'framemove)
+(setq framemove-hook-into-windmove t)
+(require 'sword-to-org)
+(require 'org-novelist)
+(require 'read-aloud)
+(require 'sermon-index)
+(require 'sermon-create)
+#+end_src
+
+* Keybindings
+:PROPERTIES:
+:CUSTOM_ID: keybindings
+:END:
+#+begin_src emacs-lisp
+
+    (use-package ace-link)
+    (use-package ace-window)
+  ; Handy key definition
+    (define-key global-map "\M-Q" 'unfill-paragraph)
+    (setq warning-suppress-log-types '((emacs)))
+#+end_src
+
+* General Keybindings
+:PROPERTIES:
+:CUSTOM_ID: general-keybindings
+:END:
+** Intro
+:PROPERTIES:
+:CUSTOM_ID: intro
+:END:
+#+begin_src emacs-lisp
+  (use-package general
+    :ensure (:wait t)
+    :config
+    (general-evil-setup)
+
+    ;; set up 'SPC' as the global leader key
+    (general-create-definer bm/leader-keys
+      :states '(normal insert visual emacs)
+      :keymaps 'override
+      :prefix "SPC" ;; set leader
+      :global-prefix "C-SPC")) ;; access leader in insert mode
+
+#+end_src
+** A, B, D, F ,G
+:PROPERTIES:
+:CUSTOM_ID: a-b-d-f-g
+:END:
+#+begin_src emacs-lisp
+  (bm/leader-keys
+  "a"  '(:ignore t :which-key "avy/ace")
+  "as" '(ace-swap-window :which-key "Swap Window")
+  "ad" '(ace-delete-window :which-key "Delete Window")
+  "aw" '(ace-window :which-key "Switch to Window")
+  "ag" '(avy-goto-char-2 :which-key "Go to Character (Avy)")
+  
+  "bm" '(consult-buffer :which-key "Consult Buffer")
+  "bp" '(previous-buffer :which-key "Previous Buffer")
+  "bC" '(clone-indirect-buffer :which-key "Clone Buffer")
+  "bc" '(clone-indirect-buffer-other-window :which-key "Clone Indirect Buffer")
+  "bf" '(bm/biblesearch :which-key "Bible Search")
+  "bl" '(bm/biblelink :which-key "Bible Link")
+  "bg" '(org-mark-ring-goto :which-key "Org Mark Goto")
+  "bi" '(sword-insert-ref :which-key "Insert BSB Link")
+
+  "dd" '(dired-org-files :which-key "Only Org")
+  
+;;E 
+  "er" '(eval-region :which-key "Eval Region")
+  "eb" '(eval-buffer :which-key "Eval Buffer")
+  "ec" '(embrace-commmander :which-key "Embrace Commander")
+  "ea" '(embrace-add :which-key "Embrace Add")
+  "ed" '(embrace-delete :which-key "Embrace Delete")
+  
+  "ei" '(isearch-emoji-by-name :which-key "Insert Emoji")
+  "el" '(emoji-insert :which-key "Emoji List")
+;;F  
+  "f"  '(:ignore t :which-key "file")
+  "fs" '(save-buffer :which-key "Save Buffer")
+  "ff" '(find-file :which-key "Find File")
+  "j"  '(ace-link :which-key "Link Jump")
+
+;;G 
+  "gi" '(bm/inbox   :which-key "Inbox")
+  "gn" '(bm/init    :which-key "Init")
+  "go" '(bm/notes   :which-key "Notes")
+  "gp" '(bm/projects  :which-key "Projects")
+
+
+  
+#+end_src
+** H, L, M, N, O,
+:PROPERTIES:
+:CUSTOM_ID: h-l-m-n-o
+:END:
+#+begin_src emacs-lisp
+  (bm/leader-keys
+
+  "ls" '(org-store-link :which-key "Store Link")
+  "li" '(org-insert-link :which-key "Insert Link")
+  "ld" '(bm/org-insert-link :which-key "Links with find-file")
+
+  "n"  '(:ignore t :which-key "Notes")
+  "nd" '(bm/org-nota-dir :which-key "Open Notes Dir")
+  "nf" '(bm/org-nota-find-file :which-key "Find Notes")
+  "ni" '(bm/org-nota-insert :which-key "Insert Notes")
+  "nm" '(bm/org-nota-insert :which-key "Insert Notes From Marked Dir")
+
+  "on" '(org-toggle-narrow-to-subtree :which-key "Narrow to Subtree")
+  "os" '(org-insert-structure-template :which-key "Org Structure Template")
+  "og" '(consult-org-heading :which-key "Consult Org Heading")
+
+  "qq" '(kill-emacs :which-key "Kill Emacs"))
+
+#+end_src
+** Publish
+:PROPERTIES:
+:CUSTOM_ID: publish
+:END:
+#+begin_src emacs-lisp
+  (bm/leader-keys
+  "p"  '(:ignore t :which-key "Org-Publish")
+  "pf" '(org-publish-current-file  :which-key "Publish Project")
+  "pp" '(org-publish-project       :which-key "Publish Project")
+  "pP" '(bm/org-publish-all        :which-key "Publish Everything"))
+#+end_src
+** R, U, T
+:PROPERTIES:
+:CUSTOM_ID: r-u-t
+:END:
+  ;;   -U- 
+#+begin_src emacs-lisp
+    (bm/leader-keys
+
+    "u"  '(:ignore t :which-key "User")
+
+    "um" '(hide-mode-line-mode :which-key "Hide Mode Link")
+    "uv" '(variable-pitch-mode :which-key "Variable Pitch Mode")
+    "ur" '(vr/replace :which-key "VR/Replace")
+    "ut" '(set-default-font-height :which-key "Set Font Height")
+    "uf" '(toggle-frame-fullscreen :which-key "Fullscreen")
+    "ug" '(avy-goto-char-2 :which-key "Go to Char")
+    "us" '(scroll-bar-mode :which-key "Scroll Bar Mode")
+    "ui" '(org-indent-mode :which-key "Org Indent")
+
+    "t"  '(:ignore t :which-key "Tabs / Tangle")
+    "tt" '(tab-new :which-key "New Tab")
+    "tl" '(tab-next :which-key "Next Tab")
+    "th" '(tab-previous :which-key "Next Previous")
+    "tc" '(tab-close :which-key "Close Tab")
+    "tb" '(org-babel-tangle :which-key "Tangle"))
+#+end_src
+** W 
+:PROPERTIES:
+:CUSTOM_ID: w
+:END:
+#+begin_src emacs-lisp
+  (bm/leader-keys
+       "wa" '(ace-window t :which-key "Ace window")
+       "wb" '(split-window-below :which-key "Split Window below")
+       "wc" '(make-frame t :which-key "create frame")
+       "wd" '(window-delete :which-key "Delete window")
+       "we" '(whisper-run :which-key "Speech To Text")
+       "wd" '(delete-window :which-key "Delete Window")
+       "wf" '(make-frame :which-key "Create a new frame")
+       "wo" '(wg-open-workgroup :which-key "Open Workgroup")
+       "ws" '(split-window-right :which-key "Split window")
+       "wj" '(window-down :which-key "Switch to window down")
+       "wk" '(window-up :which-key "Switch to window up")
+       "wh" '(window-left :which-key "switch to window left")
+       "wl" '(window-right :which-key "Switch to window right")
+       "ws" '(window-split :which-key "Split window")
+       "wv" '(window-vsplit :which-key "Split window vertically")
+       "wr" '(delete-frame t :which-key "Delete Frame")
+       "wq" '(delete-frame :which-key "Delete frame")
+       "ww" '(wg-create-workgroup :which-key "Create Workgroup"))
+       #+end_src
+** X, Y
+:PROPERTIES:
+:CUSTOM_ID: x-y
+:END:
+#+begin_src emacs-lisp
+  (bm/leader-keys
+       "x" '(execute-extended-command :which-key "M-x"))
+
+#+end_src
+
+* WHISPER
+:PROPERTIES:
+:CUSTOM_ID: whisper
+:END:
+#+begin_src emacs-lisp
+  (load-file "~/biblemacs/lisp/whisper/whisper.el")
+  (setq whisper-install-directory "~/.emacs.d/.cache"
+        whisper-model "tiny"
+        whisper-language "en"
+        whisper-translate nil
+        whisper-return-cursor-to-start nil
+        whisper-use-threads (/ (num-processors) 8))
+#+end_src
+* Website Publish
+:PROPERTIES:
+:CUSTOM_ID: website-publish
+:END:
+
+#+begin_src emacs-lisp
+(defun my/org-process-targets-and-links (backend)
+"Process <<target>> and cross-file links [[file:X.org::target]] before export.
+ Sanitizes target IDs and converts .org links to .html with consistent IDs.
+ BACKEND is the export backend (e.g., 'html or 're-reveal)."
+(save-excursion
+  (goto-char (point-min))
+  ;; Step 1: Replace <<target>> with <a id="sanitized-target"></a>
+  (while (re-search-forward "<\<\\([^>]*\\)>\>" nil t)
+    (let* ((target (match-string 1))
+           (sanitized-target (replace-regexp-in-string "[^a-zA-Z0-9]+" "-" (string-trim target))))
+      (when (not (string-empty-p sanitized-target))
+        (replace-match (format "@@html:<a id=\"%s\"></a>@@" sanitized-target) t))))
+  ;; Step 2: Fix cross-file links [[file:X.org::target]] to [[file:X.html#sanitized-target]]
+  (goto-char (point-min))
+  (while (re-search-forward "\\[\\[file:\\([^]]+?\\.org\\)::\\([^]]+?\\)\\]\\[\\([^]]*\\)\\]\\]" nil t)
+    (let* ((file (match-string 1))
+           (target (match-string 2))
+           (desc (match-string 3))
+           (sanitized-target (replace-regexp-in-string "[^a-zA-Z0-9]+" "-" (string-trim target))))
+      (when (not (string-empty-p sanitized-target))
+        (replace-match (format "[[file:%s.html#%s][%s]]"
+                              (file-name-sans-extension file)
+                              sanitized-target
+                              (if (string-empty-p desc) target desc))
+                       t))))))
+;;
+
+;; Add to export hook
+(add-hook 'org-export-before-processing-hook #'my/org-process-targets-and-links)
+
+;; Org-publish configuration with fixed :exclude patterns
+(setq org-publish-project-alist
+      '(("main"
+         :recursive t
+         :exclude "\\(code\\|resources\\)/"
+         :base-directory "~/biblemacs/org"
+         :publishing-function org-html-publish-to-html
+         :publishing-directory "~/biblemacs/pubic/"
+         :section-numbers nil
+         :with-toc nil
+         :base-extension "org"
+         :html-head-include-default-style nil
+         :html-preamble nil
+         :html-postamble nil
+         :html-doctype "html5"
+         :html-container-element "div"
+         :with-broken-links t
+         :with-smart-quotes t
+         :with-timestamps nil
+         :with-date nil
+         :with-author nil
+         :with-footnotes t
+         :htmlize-output-type nil
+         :html-validation-link nil)
+        ))
+
+;; Essential global export settings
+(setq org-html-html5-fancy t)
+(setq org-footnote-define-inline t)
+(setq org-html-use-unicode-chars nil)
+
+   (defun bm/org-publish-all ()
+        "Publish all sections."
+        (interactive)
+        (org-publish-all t))
+#+end_src
+* My Custom Functions
+:PROPERTIES:
+:CUSTOM_ID: my-custom-functions
+:END:
+** Show only .org
+#+begin_src emacs-lisp
+(defun dired-org-files (directory)
+  "Open dired showing only .org files in DIRECTORY.
+If called interactively, prompts for directory (defaults to current)."
+  (interactive "DDirectory: ")
+  (dired (concat (file-name-as-directory directory) "*.org")))
+#+end_src
+** Switch Light and Dark Theme
+:PROPERTIES:
+:CUSTOM_ID: switch-light-and-dark-theme
+:END:
+#+begin_src emacs-lisp
+(defvar bm/current-theme 'biblemacs-dark
+  "the currently active theme. defaults to dark.")
+
+(defun bm/toggle-theme ()
+  "toggle between `biblemacs-black` and `biblemacs-white`."
+  (interactive)
+  (let ((dark-theme 'biblemacs-dark)
+        (light-theme 'biblemacs-light))
+    (if (eq bm/current-theme dark-theme)
+        (progn
+          (disable-theme dark-theme)
+          (load-theme light-theme t)
+          (setq bm/current-theme light-theme)
+          (message "switched to light theme."))
+      (progn
+        (disable-theme light-theme)
+        (load-theme dark-theme t)
+        (setq bm/current-theme dark-theme)
+        (message "switched to dark theme.")))))
+#+end_src
+** Org-Nota
+:PROPERTIES:
+:CUSTOM_ID: org-nota
+:END:
+*** Define Directory
+:PROPERTIES:
+:CUSTOM_ID: define-directory
+:END:
+#+begin_src emacs-lisp
+  (defvar bm/org-nota-dir
+   (expand-file-name "~/biblemacs/org/notes/")
+   "Directory where my personal notes are stored.")
+
+  (defun bm/goto-org-nota-dir ()
+    "go to the org-nota-dir"
+    (interactive)
+    (find-file bm/org-nota-dir))
+#+end_src
+*** Find From Dir
+:PROPERTIES:
+:CUSTOM_ID: find-from-dir
+:END:
+#+begin_src emacs-lisp
+(defun bm/org-nota-find-file ()
+  "Search for a note in `bm/org-nota-dir` by its #+title: or #+filetags:.
+Create a new one if not found."
+  (interactive)
+  (unless (file-directory-p bm/org-nota-dir)
+    (error "Directory does not exist: %s" bm/org-nota-dir))
+  (let* ((all-files (directory-files bm/org-nota-dir t "\\.org$"))
+         (files (seq-filter
+                 (lambda (f) 
+                   (and (file-readable-p f)  ; Check if file is readable
+                        (not (string-match-p "/\\.#" f))))  ; Filter out lock files
+                 all-files))
+         (display-alist
+          (delq nil
+                (mapcar (lambda (file)
+                          (condition-case err
+                            (with-temp-buffer
+                              (insert-file-contents file)
+                              (goto-char (point-min))
+                              (let ((title (when (re-search-forward "^#\\+title:[ \t]*\\(.*\\)$" nil t)
+                                             (match-string 1)))
+                                    (tags (progn
+                                            (goto-char (point-min))
+                                            (when (re-search-forward "^#\\+filetags:[ \t]*\\(.*\\)$" nil t)
+                                              (match-string 1)))))
+                                (when title
+                                  (let ((display (if tags
+                                                     (format "%s  [%s]" title tags)
+                                                   title)))
+                                    (cons display file)))))
+                            (error 
+                             (message "Error reading file %s: %s" file (error-message-string err))
+                             nil)))
+                        files))))
+    (let* ((choices (mapcar #'car display-alist))
+           (chosen (completing-read "Select or create note by title/tags: " choices nil nil))
+           (existing-file (cdr (assoc chosen display-alist)))
+           (title-only (car (split-string chosen "  \\["))) ;; strip off the tags
+           (file-name (concat (file-name-as-directory bm/org-nota-dir)
+                              (replace-regexp-in-string " " "_" title-only)
+                              ".org")))
+      (if existing-file
+          (find-file existing-file)
+        (find-file file-name)))))
+
+#+end_src
+*** Insert From Dir
+:PROPERTIES:
+:CUSTOM_ID: insert-from-dir
+:END:
+#+begin_src emacs-lisp
+
+(defun bm/org-nota-insert ()
+"Insert a link to a note in `bm/org-nota-dir` using the note's #+title: as the description."
+(interactive)
+(let* ((file (read-file-name "Choose note: " bm/org-nota-dir nil t))
+       (title (with-temp-buffer
+                (insert-file-contents file)
+                (goto-char (point-min))
+                (if (re-search-forward "^#\\+title:[ \t]*\\(.*\\)$" nil t)
+                    (match-string 1)
+                  (file-name-base file)))))
+  (insert (format "[[file:%s][%s]]"
+                  (file-relative-name file bm/org-nota-dir)
+                  title))))
+
+#+end_src
+*** Store Marked Links
+:PROPERTIES:
+:CUSTOM_ID: store-marked-links
+:END:
+#+begin_src emacs-lisp
+  (defun my/org-store-links-from-dired-marked ()
+  "Store Org-mode links for all marked `.org` files in Dired using their `#+title:` as the description."
+  (interactive)
+  (unless (derived-mode-p 'dired-mode)
+    (user-error "This function must be used in a Dired buffer"))
+  (let ((files (dired-get-marked-files))
+        (count 0))
+    (dolist (file files)
+      (when (and (string-match-p "\\.org\\'" file)
+                 (file-exists-p file))
+        (let ((title (with-temp-buffer
+                       (insert-file-contents file)
+                       (goto-char (point-min))
+                       (if (re-search-forward "^#\\+title:[ \t]*\\(.*\\)$" nil t)
+                           (match-string 1)
+                         (file-name-base file)))))
+          (org-store-link-props :type "file"
+                                :link (concat "file:" file)
+                                :description title)
+          (push (list (concat "file:" file) title) org-stored-links)
+          (setq count (1+ count)))))
+    (message "Stored %d Org links from marked files." count)))
+#+end_src
+*** Insert Links from Marked Dir
+:PROPERTIES:
+:CUSTOM_ID: insert-links-from-marked-dir
+:END:
+#+begin_src emacs-lisp
+(defun my/org-insert-all-stored-links-with-titles ()
+  "Insert all stored Org links using the `#+title:` of each linked file as the description."
+  (interactive)
+  (unless org-stored-links
+    (user-error "No stored Org links"))
+  (dolist (pair org-stored-links)
+    (let* ((raw-link (car pair))
+           (file-path (when (string-match "^file:\\(.*\\)" raw-link)
+                        (match-string 1 raw-link)))
+           (title (when (and file-path (file-exists-p file-path))
+                    (with-temp-buffer
+                      (insert-file-contents file-path)
+                      (goto-char (point-min))
+                      (if (re-search-forward "^#\\+title:[ \t]*\\(.*\\)$" nil t)
+                          (match-string 1)
+                        (file-name-base file-path))))))
+      (when file-path
+        (insert (format "[[file:%s][%s]]\n" file-path (or title "Untitled")))))))
+
+  
+#+end_src
+** Org Refresh Targets
+:PROPERTIES:
+:CUSTOM_ID: org-refresh-targets
+:END:
+#+begin_src emacs-lisp
+
+ (defun org-targets-to-dots-overlay ()
+  "Replace all internal targets in the current Org buffer with ASCII dots using overlays.
+Also sets the foreground to match the default background, making the original target invisible."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (let ((default-bg (face-background 'default nil t)))
+      (while (re-search-forward "\<\<\\([^>]+\\)\>\>" nil t)
+        (let ((ov (make-overlay (match-beginning 0) (match-end 0))))
+          (overlay-put ov 'display "•")
+          (overlay-put ov 'face `(:foreground ,default-bg)))))))
+
+
+  (defun refresh-org-target-overlays ()
+    "Refresh overlays for org-targets-to-dots in the current buffer."
+    (interactive)
+    (remove-overlays) ;; Clear existing overlays
+    (org-targets-to-dots-overlay))
+#+end_src
+** Reading Mode
+:PROPERTIES:
+:CUSTOM_ID: reading-mode
+:END:
+#+begin_src emacs-lisp
+    (use-package  hl-sentence)
+
+    (with-eval-after-load 'evil-maps
+    (define-key evil-normal-state-map (kbd "m") 'evil-org-forward-sentence)
+    (define-key evil-normal-state-map (kbd "M") 'evil-org-backward-sentence))
+
+  (defun my-hl-sentence-mode-hook ()
+  "Adjust scroll-margin based on hl-sentence-mode."
+  (if hl-sentence-mode
+      (setq scroll-margin 40)  ; Set scroll-margin to 40 when hl-sentence-mode is enabled
+    (setq scroll-margin 5))) ; Set scroll-margin to 5 when hl-sentence-mode is disabled
+
+(add-hook 'hl-sentence-mode-hook 'my-hl-sentence-mode-hook)
+
+#+end_src
+
+** Unfill Paragraph
+:PROPERTIES:
+:CUSTOM_ID: unfill-paragraph
+:END:
+#+begin_src emacs-lisp
+
+  ;;; Stefan Monnier <foo at acm.org>. It is the opposite of fill-paragraph    
+  (defun unfill-paragraph (&optional region)
+    "Takes a multi-line paragraph and makes it into a single line of text."
+    (interactive (progn (barf-if-buffer-read-only) '(t)))
+    (let ((fill-column (point-max))
+          ;; This would override `fill-column' if it's an integer.
+          (emacs-lisp-docstring-fill-column t))
+      (fill-paragraph nil region)))
+
+  ;; Handy key definition
+  (define-key global-map "\M-Q" 'unfill-paragraph)
+
+#+end_src
+
+** Set Variable font/Default font
+:PROPERTIES:
+:CUSTOM_ID: set-variable-font-default-font
+:END:
+#+begin_src emacs-lisp
+  (defun set-variable-pitch-font ()
+  "Ask for a font name and set it as the variable-pitch font face"
+  (interactive)
+  (let ((font-name (read-string "Enter font name: ")))
+    (set-face-attribute 'variable-pitch nil :family font-name)))
+
+  (defun set-default-font ()
+  "Ask for a font name and set it as the default font face"
+  (interactive)
+  (let ((font-name (read-string "Enter font name: ")))
+    (set-face-attribute 'default nil :family font-name)))
+#+end_src
+** Workgroups
+:PROPERTIES:
+:CUSTOM_ID: workgroups
+:END:
+Put at the bottom of you .emacs
+#+begin_src emacs-lisp
+(use-package workgroups2 
+:ensure (workgroups2 :host github :repo "pashinin/workgroups2" :wait t))
+#+end_src
+
+** Biblesearch and Biblelink
+:PROPERTIES:
+:CUSTOM_ID: biblesearch-and-biblelink
+:END:
+
+#+begin_src emacs-lisp
+
+(defun bm/biblesearch ()
+  "Prompt for a Bible reference like 'Genesis', 'Genesis 1', or 'Genesis 1:27'.
+For Psalms, open Psalms.org and jump to '** Psalm N' (singular) or verse if specified.
+Handles books starting with numbers like '1 Corinthians' or '2 Kings'.
+After navigating, recenter so the found text is at the top of the buffer."
+  (interactive)
+  (let* ((bible-directory "~/biblemacs/bible/")
+         (input (read-string "Bible Reference (e.g., Genesis 1:27): "))
+         (case-fold-search t)
+         book chapter verse bible-file)
+    ;; Parse book, chapter, verse
+    (when (string-match "\\`\\([0-9]+[ \t]+[A-Za-z]+\\|[A-Za-z]+\\)\\(?:[ \t]+\\([0-9]+\\)\\(?:[:]\\([0-9]+\\)\\)?\\)?\\'" input)
+      (setq book (string-trim (match-string 1 input)))
+      (setq chapter (match-string 2 input))
+      (setq verse (match-string 3 input)))
+    
+    ;; Convert book name to filename format (replace spaces with underscores)
+    (when book
+      (let ((book-for-file (replace-regexp-in-string "[ \t]+" "_" book)))
+        ;; Special case: Psalms file, but singular in heading
+        (if (string-match-p "^Psalm\\(s\\)?$" book)
+            (setq bible-file (expand-file-name "Psalms.org" bible-directory))
+          (setq bible-file (expand-file-name (concat book-for-file ".org") bible-directory)))))
+    
+    ;; Open file and go to location
+    (if (not (file-exists-p bible-file))
+        (message "Bible file not found: %s" bible-file)
+      (find-file bible-file)
+      (goto-char (point-min))
+      (let ((found nil))
+        (cond
+         ((and chapter verse)
+          (if (string-match-p "^Psalm\\(s\\)?$" book)
+              ;; For Psalms: look for singular heading and verse
+              (progn
+                (when (re-search-forward (format "^\\*+ Psalm %s\\b" chapter) nil t)
+                  (setq found (re-search-forward (format "\\<\\<%s:%s\\>\\>" chapter verse) nil t))))
+            ;; For other books
+            (setq found (re-search-forward (format "\\<\\<%s:%s\\>\\>" chapter verse) nil t))))
+         
+         (chapter
+          (if (string-match-p "^Psalm\\(s\\)?$" book)
+              (setq found (re-search-forward (format "^\\*+ Psalm %s\\b" chapter) nil t))
+            (setq found (re-search-forward (format "^\\*+ %s %s\\b" book chapter) nil t))))
+         
+         (t
+          ;; Only book: stay at top
+          (goto-char (point-min))
+          (setq found t)))
+        
+        ;; ✅ Scroll so found text is at the top of the buffer
+        (when found
+          (recenter 0))
+        
+        ;; Message if not found
+        (unless found
+          (message "Could not locate reference: %s" input))))))
+
+(defun bm/biblelink ()
+  "Prompt for a file inside the /bible/ folder, a starting verse, and an ending verse, then create an Org link to the reference.
+If the file is Psalms.org, the link description should use 'Psalm' (singular) instead of 'Psalms'."
+  (interactive)
+  (let* ((bible-dir "~/biblemacs/bible/")
+         (files (directory-files bible-dir nil "\\.org$"))
+         (books (mapcar (lambda (file)
+                          (file-name-sans-extension file))
+                        files))
+         (file (completing-read "Select Bible Book: " books))
+         (starting-verse (read-string "Enter the starting verse (e.g., 1:1): "))
+         ;; Adjust display name
+         (book-name (capitalize (replace-regexp-in-string "_" " " file)))
+         (display-name (if (string= book-name "Psalms") "Psalm" book-name))
+         ;; Build link
+         (link (format "[[file:%s%s.org::%s][%s %s]]"
+                       bible-dir file starting-verse display-name starting-verse)))
+    (insert link)))
+
+
+
+
+(defun bm/biblelink-from-region ()
+  "Convert highlighted Bible reference into an Org link pointing to the corresponding .org file.
+Handles full references (e.g., 'John 6:35'), chapters only (e.g., 'John 6'),
+and special handling for 'Psalm' or 'Psalms' linking to 'Psalms.org'.
+Description keeps the full region text."
+  (interactive)
+  (let* ((bible-dir "~/biblemacs/bible/")
+         (region-text (string-trim (buffer-substring-no-properties (region-beginning) (region-end))))
+         ;; Match: Book + Chapter + optional :Verse + optional -Range
+         (reference-regex "^\\([1-3]? ?[A-Za-z]+\\)\\s-+\\([0-9]+\\)\\(?::\\([0-9]+\\)\\)?\\(-[0-9]+\\)?$"))
+    (if (string-match reference-regex region-text)
+        (let* ((book-raw (string-trim (match-string 1 region-text)))
+               (chapter (match-string 2 region-text))
+               (verse (match-string 3 region-text))
+               (full-ref region-text)
+               ;; Determine file name (special case for Psalms)
+               (file-base (if (string-match-p "^Psalm\\(s\\)?$" book-raw)
+                              "Psalms"
+                            (capitalize (replace-regexp-in-string
+                                         " " "_"
+                                         (downcase book-raw)))))
+               ;; Determine target: if verse exists, use it, else use chapter heading
+               (target (if verse
+                           (format "%s:%s" chapter verse)
+                         ;; Use heading syntax for chapter-only link
+                         (format "%s %s" (if (string-match-p "^Psalm\\(s\\)?$" book-raw)
+                                             "Psalm"
+                                           (capitalize book-raw))
+                                 chapter)))
+               (link (format "[[file:%s%s.org::*%s][%s]]"
+                             bible-dir file-base target full-ref)))
+          (delete-region (region-beginning) (region-end))
+          (insert link))
+      (message "Region does not appear to be a valid Bible reference."))))
+
+#+end_src
+
+** Create Note with Bible References
+:PROPERTIES:
+:CUSTOM_ID: create-note-with-bible-references
+:END:
+#+begin_src emacs-lisp
+(defun bm/bible-reference-note-linker ()
+  "Create a comprehensive Bible reference linking system:
+1. Ask for Bible references
+2. Ask for note title
+3. Create note file
+4. Add backlinks in Bible files interactively
+5. Insert all references in the note
+6. Apply sword-multiple-refs-with-links formatting"
+  (interactive)
+  (let* (;; Step 1: Get Bible references
+         (references-input (read-string "Enter Bible references (separated by commas): "))
+         (references (mapcar #'string-trim 
+                           (split-string references-input "," t "[[:space:]]*")))
+         
+         ;; Step 2: Get note title
+         (note-title (read-string "Enter note title: "))
+         
+         ;; Step 3: Create the note file
+         note-file note-buffer)
+    
+    ;; Store references globally for processing
+    (setq bm/pending-references references)
+    (setq bm/original-references references)
+    (setq bm/current-note-file nil)
+    (setq bm/current-note-title note-title)
+    
+    ;; Create the note using bm/org-nota-find-file logic
+    (let* ((files (directory-files bm/org-nota-dir t "\\.org$"))
+           (title-file-alist
+            (delq nil
+                  (mapcar (lambda (file)
+                            (with-temp-buffer
+                              (insert-file-contents file)
+                              (goto-char (point-min))
+                              (when (re-search-forward "^#\\+title:[ \t]*\\(.*\\)$" nil t)
+                                (cons (match-string 1) file))))
+                          files)))
+           (existing-file (cdr (assoc note-title title-file-alist)))
+           (file-name (concat bm/org-nota-dir "/" 
+                            (replace-regexp-in-string " " "_" note-title) ".org")))
+      
+      (setq note-file (if existing-file existing-file file-name))
+      (setq note-buffer (find-file-noselect note-file))
+      (setq bm/current-note-file note-file)
+      
+      ;; Initialize the note file if it's new
+      (with-current-buffer note-buffer
+        (when (= (buffer-size) 0)
+          (insert (format "#+title: %s\n\n" note-title))
+          (save-buffer))))
+    
+    ;; Start processing the first reference
+    (bm/process-next-reference)))
+
+(defun bm/process-next-reference ()
+  "Process the next reference in the queue."
+  (if bm/pending-references
+      (let ((current-ref (car bm/pending-references)))
+        (setq bm/pending-references (cdr bm/pending-references))
+        (bm/add-backlink-to-bible-reference current-ref bm/current-note-file bm/current-note-title))
+    ;; All references processed, finalize the note
+    (bm/finalize-note)))
+
+(defun bm/add-backlink-to-bible-reference (reference note-file note-title)
+  "Add a backlink in the Bible file for the given reference.
+Goes to each verse in the range and interactively adds numbered notes."
+  (let* ((parsed-ref (bm/parse-bible-reference reference))
+         (book (plist-get parsed-ref :book))
+         (chapter (plist-get parsed-ref :chapter))
+         (start-verse (plist-get parsed-ref :start-verse))
+         (end-verse (plist-get parsed-ref :end-verse))
+         (bible-directory "~/biblemacs/site/bible/")
+         (bible-file (expand-file-name (concat book ".org") bible-directory)))
+    
+    (when (and book chapter start-verse (file-exists-p bible-file))
+      ;; Handle both single verses and ranges
+      (let ((verses-to-process (if end-verse
+                                 (number-sequence (string-to-number start-verse)
+                                                (string-to-number end-verse))
+                               (list (string-to-number start-verse)))))
+        
+        ;; Store the verses queue for this reference
+        (setq bm/current-verses-queue verses-to-process)
+        (setq bm/current-bible-file bible-file)
+        (setq bm/current-book book)
+        (setq bm/current-chapter chapter)
+        
+        ;; Process the first verse
+        (bm/process-next-verse note-file note-title)))))
+
+(defun bm/process-next-verse (note-file note-title)
+  "Process the next verse in the current reference."
+  (if bm/current-verses-queue
+      (let ((verse-num (car bm/current-verses-queue)))
+        (setq bm/current-verses-queue (cdr bm/current-verses-queue))
+        (bm/add-interactive-note-to-verse bm/current-bible-file 
+                                         bm/current-book 
+                                         bm/current-chapter
+                                         (number-to-string verse-num) 
+                                         note-file 
+                                         note-title))
+    ;; All verses in this reference processed, continue to next reference
+    (bm/process-next-reference)))
+
+(defun bm/add-interactive-note-to-verse (bible-file book chapter verse note-file note-title)
+  "Interactively add a numbered note to a specific verse."
+  (with-current-buffer (find-file bible-file)
+    ;; Search for the verse
+    (goto-char (point-min))
+    (when (re-search-forward (format "\<\<%s:%s\>\>" chapter verse) nil t)
+      ;; Ask for the note number
+      (let ((note-number (read-string (format "Enter note number for %s %s:%s: " 
+                                            book chapter verse))))
+        
+        ;; Set up temporary keybinding and store the note info
+        (setq bm/temp-note-number note-number)
+        (setq bm/temp-verse verse)
+        (setq bm/temp-note-file note-file)
+        (setq bm/temp-note-title note-title)
+        (setq bm/temp-chapter chapter)
+        
+        ;; Set up the temporary keybinding
+        (local-set-key (kbd "C-c SPC") 'bm/insert-note-marker)
+        
+        ;; Show message and wait
+        (message "Position cursor where you want +%s+ inserted, then press C-c SPC" note-number)))))
+
+(defun bm/insert-note-marker ()
+  "Insert the note marker at current position and add the notes block."
+  (interactive)
+  ;; Insert the note marker at current position
+  (insert (format " +%s+" bm/temp-note-number))
+  
+  ;; Find the end of this verse to add the notes block
+  (save-excursion
+    ;; Look for next verse target or end of section
+    (if (re-search-forward (format "\<\<%s:[0-9]+\>\>" bm/temp-chapter) nil t)
+        (progn
+          (beginning-of-line)
+          (backward-char 1)) ; Go to end of previous line
+      ;; If no next verse found, go to end of buffer or next heading
+      (if (re-search-forward "^\\*+ " nil t)
+          (progn
+            (beginning-of-line)
+            (backward-char 1))
+        (goto-char (point-max))))
+    
+    ;; Add the notes block
+    (insert (format "\n+%s.%s+ - " bm/temp-verse bm/temp-note-number))
+    ;; Insert the note link
+    (let ((relative-path (file-relative-name bm/temp-note-file bm/org-nota-dir)))
+      (insert (format "[[file:%s][%s]]" relative-path bm/temp-note-title)))
+    (insert "\n"))
+  
+  ;; Clean up temporary variables and keybinding
+  (local-unset-key (kbd "C-c SPC"))
+  (let ((temp-note-file bm/temp-note-file)
+        (temp-note-title bm/temp-note-title))
+    (setq bm/temp-note-number nil)
+    (setq bm/temp-verse nil)
+    (setq bm/temp-note-file nil)
+    (setq bm/temp-note-title nil)
+    (setq bm/temp-chapter nil)
+    
+    (save-buffer)
+    (message "Note marker inserted and notes block added!")
+    
+    ;; Continue with the next verse
+    (bm/process-next-verse temp-note-file temp-note-title)))
+
+(defun bm/continue-next-verse ()
+  "Continue processing after a verse is completed."
+  (bm/process-next-reference))
+
+(defun bm/finalize-note ()
+  "Add all references to the note and format them."
+  (let ((note-buffer (find-file-noselect bm/current-note-file)))
+    
+    (with-current-buffer note-buffer
+      (goto-char (point-max))
+      (insert "\n* Bible References\n\n")
+      (let ((start-pos (point)))
+        ;; Insert all original references, each on its own line
+        (dolist (ref bm/original-references)
+          (insert (string-trim ref) "\n"))
+        ;; Select the inserted references
+        (set-mark start-pos)
+        (goto-char (1- (point))) ; Move back one to exclude final newline
+        (activate-mark)
+        ;; Apply the sword formatting
+        (sword-multiple-refs-with-links)
+        (deactivate-mark))
+      (save-buffer))
+    
+    ;; Switch to the note buffer
+    (switch-to-buffer note-buffer)
+    (message "Bible reference note created and linked successfully!")
+    
+    ;; Clean up global variables
+    (setq bm/pending-references nil)
+    (setq bm/current-note-file nil)
+    (setq bm/current-note-title nil)
+    (setq bm/original-references nil)
+    (setq bm/current-verses-queue nil)
+    (setq bm/current-bible-file nil)
+    (setq bm/current-book nil)
+    (setq bm/current-chapter nil)))
+
+(defun bm/parse-bible-reference (reference)
+  "Parse a Bible reference like 'John 3:16' or 'John 3:15-19' into components.
+Returns a plist with :book, :chapter, :start-verse, and :end-verse."
+  (let ((case-fold-search t)
+        book chapter start-verse end-verse)
+    
+    ;; Match patterns like "John 3:16" or "John 3:15-19"
+    (cond
+     ;; Range pattern: "John 3:15-19"
+     ((string-match "\\`\\([^0-9]+?\\)[ \t]+\\([0-9]+\\):\\([0-9]+\\)-\\([0-9]+\\)\\'" reference)
+      (setq book (capitalize (string-trim (match-string 1 reference))))
+      (setq chapter (match-string 2 reference))
+      (setq start-verse (match-string 3 reference))
+      (setq end-verse (match-string 4 reference)))
+     
+     ;; Single verse pattern: "John 3:16"
+     ((string-match "\\`\\([^0-9]+?\\)[ \t]+\\([0-9]+\\):\\([0-9]+\\)\\'" reference)
+      (setq book (capitalize (string-trim (match-string 1 reference))))
+      (setq chapter (match-string 2 reference))
+      (setq start-verse (match-string 3 reference))
+      (setq end-verse nil)))
+    
+    (list :book book 
+          :chapter chapter 
+          :start-verse start-verse 
+          :end-verse end-verse)))
+#+end_src
+** New Files Auto-Insert
+:PROPERTIES:
+:CUSTOM_ID: new-files-auto-insert
+:END:
+
+#+begin_src emacs-lisp
+  
+(defun my/org-insert-headers ()
+  "Insert headers for Org files when creating a new file."
+  (let ((filename (file-name-nondirectory (buffer-file-name))))
+    ;; Remove file extension
+    (setq filename (file-name-sans-extension filename))
+    ;; Convert spaces to underscores for the title
+    (setq filename (replace-regexp-in-string "_" " " filename))
+    (insert (format "#+TITLE: %s\n" filename))
+    (insert (format "#+DATE: %s\n" (format-time-string "%Y-%m-%d")))
+    (insert "#+FILETAGS: \n\n")))
+
+    ;; Set the function to run when opening a new Org file
+    (add-hook 'find-file-hook
+              (lambda ()
+                (when (and (string= (file-name-extension buffer-file-name) "org")
+                           (eq (point-min) (point-max))) ;; check if it's a new file
+                  (my/org-insert-headers))))
+
+
+  (defun rename-file-with-underscores ()
+  "Rename the current buffer's file, replacing spaces with underscores."
+  (interactive)
+  (let ((current-file (buffer-file-name)))
+    (if (and current-file (file-exists-p current-file))
+        (let ((new-name (replace-regexp-in-string " " "_" current-file)))
+          (if (not (equal current-file new-name))
+              (progn
+                (rename-file current-file new-name t)
+                (set-visited-file-name new-name)
+                (message "Renamed to %s" new-name))
+            (message "No spaces in the file name."))
+      (message "Not visiting a file!")))))
+
+#+end_src
+
+** Figlet
+:PROPERTIES:
+:CUSTOM_ID: figlet
+:END:
+
+#+begin_src emacs-lisp
+
+  (defun insert-figlet-ansi-shadow (text)
+    "Insert the output of figlet with 'ANSI Shadow' font at point."
+    (interactive "sText for figlet: ")
+    (let ((figlet-output (shell-command-to-string (concat "figlet -f 'ANSI Shadow' " (shell-quote-argument text)))))
+      (insert figlet-output)))
+
+
+  (defun insert-figlet-doom (text)
+    "Insert the output of figlet with 'ANSI Shadow' font at point."
+    (interactive "sText for figlet: ")
+    (let ((figlet-output (shell-command-to-string (concat "figlet -f 'doom' " (shell-quote-argument text)))))
+      (insert figlet-output)))
+
+#+end_src
+
+** My Links 
+:PROPERTIES:
+:CUSTOM_ID: my-links
+:END:
+#+begin_src emacs-lisp
+
+    (defun bm/init    ()(interactive) (find-file "~/biblemacs/init.org"))
+    (defun bm/projects  ()(interactive) (find-file "~/biblemacs/projects/"))
+    (defun bm/init.el   ()(interactive) (find-file "~/.emacs.d/init.el"))
+
+#+end_src

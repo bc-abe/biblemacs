@@ -1,0 +1,25 @@
+#+TITLE: INDEX
+
+
+* Bible
+
+| [[file:bible/Genesis.org][Genesis]]         | [[file:bible/Exodus.org][Exodus]]   | [[file:bible/Leviticus.org][Leviticus]] | [[file:bible/Deuteronomy.org][Deuteronomy]]  |
+| [[file:bible/Joshua.org][Joshua]]          | [[file:bible/Judges.org][Judges]]   | [[file:bible/Ruth.org][Ruth]]      | [[file:bible/1_Samuel.org][1 Samuel]]     |
+| [[file:bible/2_Samuel.org][2 Samuel]]        | [[file:bible/1_Kings.org][1 Kings]]  | [[file:bible/2_Kings.org][2 Kings]]   | [[file:bible/1_Chronicles.org][1 Chronicles]] |
+| [[file:bible/2_Chronicles.org][2 Chronicles]]    | [[file:bible/Ezra.org][Ezra]]     | [[file:bible/Nehemiah.org][Nehemiah]]  | [[file:bible/Esther.org][Esther]]       |
+| [[file:bible/Job.org][Job]]             | [[file:bible/Psalms.org][Psalms]]   | [[file:bible/Proverbs.org][Proverbs]]  | [[file:bible/Ecclesiastes.org][Ecclesiastes]] |
+| [[file:bible/Song_of_Solomon.org][Song of Solomon]] | [[file:bible/Isaiah.org][Isaiah]]   | [[file:bible/Jeremiah.org][Jeremiah]]  | [[file:bible/Lamentations.org][Lamentations]] |
+| [[file:bible/Ezekiel.org][Ezekiel]]         | [[file:bible/Daniel.org][Daniel]]   | [[file:bible/Hosea.org][Hosea]]     | [[file:bible/Joel.org][Joel]]         |
+| [[file:bible/Amos.org][Amos]]            | [[file:bible/Obadiah.org][Obadiah]]  | [[file:bible/Jonah.org][Jonah]]     | [[file:bible/Micah.org][Micah]]        |
+| [[file:bible/Nahum.org][Nahum]]           | [[file:bible/Habukkuk.org][Habakkuk]] | [[file:bible/Zephaniah.org][Zephaniah]] | [[file:bible/Haggai.org][Haggai]]       |
+| [[file:bible/Zechariah.org][Zechariah]]       | [[file:bible/Malachi.org][Malachi]]  |           |              |
+
+-----
+
+| [[file:bible/Matthew.org][Matthew]]         | [[file:bible/Mark.org][Mark]]            | [[file:bible/Luke.org][Luke]]          | [[file:bible/John.org][John]]          |
+| [[file:bible/Acts.org][Acts]]            | [[file:bible/Romans.org][Romans]]          | [[file:bible/1_Corinthians.org][1 Corinthians]] | [[file:bible/2_Corinthinas.org][2 Corinthians]] |
+| [[file:bible/Galatians.org][Galatians]]       | [[file:bible/Ephesians.org][Ephesians]]       | [[file:bible/Philippians.org][Philippians]]   | [[file:bible/Colossians.org][Colossians]]    |
+| [[file:bible/1_Thessalonians.org][1 Thessalonians]] | [[file:bible/2_Thessalonians.org][2 Thessalonians]] | [[file:bible/1_Timothy.org][1 Timothy]]     | [[file:bible/2_Timothy.org][2 Timothy]]     |
+| [[file:bible/Titus.org][Titus]]           | [[file:bible/Philemon.org][Philemon]]        | [[file:bible/Hebrews.org][Hebrews]]       | [[file:bible/James.org][James]]         |
+| [[file:bible/1_Peter.org][1 Peter]]         | [[file:bible/2_Peter.org][2 Peter]]         | [[file:bible/1_John.org][1 John]]        | [[file:bible/2_John.org][2 John]]        |
+| [[file:bible/3_John.org][3 John]]          | [[file:bible/Jude.org][Jude]]            | [[file:bible/Revelation.org][Revelation]]    |               |

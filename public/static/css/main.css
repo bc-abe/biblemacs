@@ -1,0 +1,234 @@
+
+@import url("fonts.css");
+/* General body styling */
+body {
+    background-color: #0a0d0a;
+    color: #f5fff5;
+    font-family: 'Crimson Pro', serif;
+    width: 55ch;
+    margin: 0 auto;
+    padding: 20px;
+    font-size: 20px;
+}
+
+p {
+    width: 500px;
+    -webkit-user-modify: read-write;
+    border:none;
+    outline:none;
+}
+
+/* Centered heading styles with small caps */
+h1, h2, h3 {
+    text-align: left;
+    font-weight: bold;
+    font-size: 24px;
+    margin-bottom: 20px;
+    font-variant: small-caps; /* Small caps for headings */
+}
+
+h1{
+
+    font-size: 3.4em;
+    text-align: center;
+}
+h2{
+
+    font-size: 2.1em;
+}
+h3{
+
+    font-size: 0.8em;
+}
+/* Link styling */
+a {
+    color: #dcdedc; /* Slightly darker than #f5fff5 */
+    text-decoration: none; /* No underline by default */
+}
+
+a:hover {
+    color: #ffffff; /* Change color to white on hover */
+    text-decoration: underline; /* Underline on hover */
+}
+
+/* Style for Org-mode generated tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.org-center {
+text-align: center;
+}
+
+th, td {
+    padding: 8px;
+    color: #f5fff5;
+}
+
+th {
+    text-align: left;
+    font-weight: bold;
+    border-bottom: 2px solid #f5fff5;
+}
+
+
+td {
+    text-align: left;
+}
+
+/* Styling for the table rows */
+tr {
+    border-bottom: 1px solid #333;
+    text-align: left;
+}
+
+tr:last-child {
+    border-bottom: none;
+}
+
+/* Scrollbar styles for WebKit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0a0d0a;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #2e2e2e;
+    border-radius: 10px;
+    border: 2px solid #0a0d0a;
+}
+
+/* Scrollbar styles for Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #2e2e2e #0a0d0a;
+}
+
+form
+{
+width: auto;
+}
+
+input
+{
+background-color: #0A0D0A;
+border: none;
+border-bottom: 1px solid #f5fff5;
+width: -webkit-fill-available;
+color: #F5FFF5;
+
+}
+
+textarea {
+background-color: #0A0D0A;
+border: none;
+color: #F5FFF5;
+}
+
+
+/* CSS */
+.button-4 {
+  appearance: none;
+  background-color: #3A3A3D;
+  border: 1px solid rgba(27, 31, 35, 0.15);
+  border-radius: 6px;
+  box-sizing: border-box;
+  color: #F5FFF5;
+  cursor: pointer;
+  display: inline-block;
+  font-family: "Crimson Pro";
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  list-style: none;
+  padding: 6px 16px;
+  position: relative;
+  transition: background-color 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: middle;
+  white-space: nowrap;
+  word-wrap: break-word;
+}
+
+.button-4:hover {
+  background-color: #F3F4F6;
+  text-decoration: none;
+  transition-duration: 0.1s;
+}
+
+.button-4:disabled {
+  background-color: #FAFBFC;
+  border-color: rgba(27, 31, 35, 0.15);
+  color: #F5FFF5;
+  cursor: default;
+}
+
+.button-4:active {
+  background-color: #EDEFF2;
+  box-shadow: rgba(225, 228, 232, 0.2) 0 1px 0 inset;
+  transition: none 0s;
+}
+
+.button-4:focus {
+  outline: 1px transparent;
+}
+
+.button-4:before {
+  display: none;
+}
+
+.button-4:-webkit-details-marker {
+  display: none;
+}
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  list-style: none;
+  padding: 6px 16px;
+  position: relative;
+  transition: background-color 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: middle;
+  white-space: nowrap;
+  word-wrap: break-word;
+}
+
+.button-4:hover {
+  background-color: #F3F4F6;
+  text-decoration: none;
+  transition-duration: 0.1s;
+}
+
+.button-4:disabled {
+  background-color: #FAFBFC;
+  border-color: rgba(27, 31, 35, 0.15);
+  color: #959DA5;
+  cursor: default;
+}
+
+.button-4:active {
+  background-color: #EDEFF2;
+  box-shadow: rgba(225, 228, 232, 0.2) 0 1px 0 inset;
+  transition: none 0s;
+}
+
+.button-4:focus {
+  outline: 1px transparent;
+}
+
+.button-4:before {
+  display: none;
+}
+
+.button-4:-webkit-details-marker {
+  display: none;
+}

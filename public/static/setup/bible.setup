@@ -1,0 +1,5 @@
+# -*- mode: org; -*-
+#+OPTIONS: html-style:nil
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="../static/css/bible.css"/>
+#+HTML_HEAD: <script type="text/javascript" src="../static/js/bible-find.js" defer></script>
+#+HTML_HEAD:    <script src"../static/js/bible-find.js" defer></script>

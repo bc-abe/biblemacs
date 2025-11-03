@@ -1,0 +1,310 @@
+  /* This style is based off Tufte CSS */
+
+@import url("fonts.css");
+
+  html {
+      font-size: 15px;
+  }
+
+  body {
+      width: 60%;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 0%;
+      font-family: Crimson Pro, Georgia, serif;
+      background-color: #0a0d0a;
+      color: #F5FFF5;
+      max-width: 600px;
+      counter-reset: sidenote-counter;
+  }
+
+  
+  
+  h1 {
+      font-weight: 400;
+      margin-top: 4rem;
+      margin-bottom: 0.5rem;
+      margin-left: -0.5rem;
+      margin-right: -0.5rem;
+      font-size: 3.2rem;
+      padding: 1em;
+      line-height: 1;
+      text-align: center;
+      font-variant: small-caps; /* Small caps for headings */
+      background: #0a0d0a
+  }
+  h1:first-child {
+  display: none;
+  }
+/* Hide all h2 elements initially */
+h2 {
+  opacity: 0; /* Hide h2 tags */
+  position: relative;
+  transition: opacity 0.0s;
+}
+
+/* Ensure the container for h2 is positioned relative to enable sticky positioning */
+.container {
+    position: relative;
+}
+
+/* Make the most recent h2 sticky */
+h2.sticky {
+  opacity: 1; /* Show the sticky h2 tag */
+  position: -webkit-fixed; /* For Safari */
+  position: fixed;
+  top: 0;
+  background-color: #0a0d0a; /* Adjust background color if needed */
+  z-index: 1; /* Ensure the h2 stays above other content */
+  font-weight: 400;
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+  margin-left: -40rem;
+  margin-right: -40rem;
+  font-size: 3.2rem;
+  padding: 0.5em;
+  line-height: 1;
+  text-align: center;
+  font-variant: small-caps; /* Small caps for headings */
+  position: sticky; top: 0;
+  background: #0a0d0a;
+	    
+}
+
+
+
+
+/* Hide all h2 elements initially */
+h2 {
+  opacity: 0; /* Hide h2 tags */
+  position: relative;
+  transition: opacity 0.3s;
+}
+
+/* Ensure the container for h2 is positioned relative to enable sticky positioning */
+.container {
+  position: relative;
+}
+
+
+  
+  h3 {
+      float: left;
+      /* clear: right; */
+      margin-left: -33%;
+      width: 30%;
+      margin-top: 0.3rem;
+      margin-bottom: 0;
+      /* font-size: 1.0rem; */
+      line-height: 1.3;
+      vertical-align: baseline;
+      position: relative;
+      font-style: italic;
+      text-align: right;
+  }
+
+  hr {
+      display: block;
+      height: 1px;
+      width: 55%;
+      border: 0;
+      border-top: 1px solid #ccc;
+      margin: 1em 0;
+      padding: 0;
+  }
+
+  p.subtitle {
+      font-style: italic;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+      font-size: 1.8rem;
+      display: block;
+      line-height: 1;
+  }
+
+
+
+
+  p,
+  dl,
+  ol,
+  ul {
+      font-size: 1.4rem;
+      line-height: 2rem;
+  }
+
+ p {
+      margin-top: 0rem;
+      margin-bottom: 0rem;
+      padding-right: 0;
+      vertical-align: baseline;
+      text-indent: 1em;
+      text-align: justify;
+      hyphens: auto;
+  }
+
+p:first-line {
+  text-indent: 0;       /* just to be sure */
+}
+
+
+span.drop + p {
+  text-indent: 0;
+}
+
+  b {
+  weight: 700;
+  color: #FF8080;
+  }
+  
+
+p:has(span.drop) {
+  text-indent: 0;
+}
+
+p.verse { text-indent: 0em;
+	  padding-left: 2em;}
+
+p.verse b {
+  display: inline-block;
+  margin-left: -1.1em;
+}
+
+del{
+    text-decoration: none;
+    color: #0a0d0a;
+    font-size: 0.65em;
+    padding: 0.01em 0.2em;
+    margin-bottom: 1em;
+    background-color: #ff8080 ;
+    border-radius: 2px;
+    vertical-align: baseline;
+    font-weight: 900;
+   
+
+}
+
+a {
+    color: #dcdedc; /* Slightly darker than #f5fff5 */
+    text-decoration: none; /* No underline by default */
+}
+
+a:hover {
+    color: #ffffff; /* Change color to white on hover */
+    text-decoration: underline; /* Underline on hover */
+}
+  blockquote {
+      font-size: 1.4rem;
+  }
+
+  blockquote p {
+      width: 80%;
+      margin-right: 40px;
+      font-style: italic;
+  }
+
+  .sidenote,
+  .notes p,
+  .marginnote {
+      float: right;
+      clear: right;
+      margin-right: -50%;
+      width: 45%;
+      margin-top: -2em;
+      margin-bottom: 0;
+      font-size: 0.95em;
+      line-height: 1.3;
+      vertical-align: baseline;
+      position: relative;
+      text-indent: 0em;
+  }
+
+  /* stops indent after notes div */
+div.notes p {
+  text-indent: 0em;
+  text-align: left;
+}
+
+sup{
+   color: #FF8080;
+   font-weight: 900;
+   font-size: 0.2em;
+}
+
+  blockquote .sidenote,
+  blockquote .marginnote {
+      margin-right: -82%;
+      min-width: 59%;
+      text-align: left;
+  }
+
+
+  span.newthought {
+      font-variant: small-caps;
+      font-size: 1.2em;
+  }
+
+
+    .drop {
+  color: #FF8080;
+  float: left;
+  font-family: Crimson Pro;
+  font-size: 75px;
+  line-height: 55px;
+  padding-top: 3px;
+  padding-right: 10px;
+  padding-left: 20px;
+  margin-left: -22px;
+  font-weight: 700;
+}
+
+@keyframes beacon {
+  from { background-color: #ffff99; }
+  to   { background-color: transparent; }
+}
+
+.beacon-highlight {
+  animation: beacon 2s ease-out;
+}
+
+
+@media only screen and (max-width: 1000px) {
+  html {
+    font-size: 13px;
+  }
+
+    body
+  {
+  margin-right: 17%;
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  html { font-size: 11px; width: 98%; }
+  body { margin-right: 15%;  }
+}
+
+@media only screen and (max-width: 680px) {
+  html { font-size: 11px; width: 96%; }
+  body { margin-right: 15%;  }
+}
+
+@media only screen and (max-width: 550px) {
+  html { font-size: 11px; width: 94%; }
+  body { margin-right: 15%;  }
+}
+
+@media only screen and (max-width: 480px) {
+  html { font-size: 10px; width: 92%; }
+  body { margin-right: 14%; }  
+}
+
+@media only screen and (max-width: 445px) {
+  html { font-size: 8.5px; width: 90%; }
+  body { margin-right: 16%; }  
+}
+
+@media only screen and (max-width: 375px) {
+  html { font-size: 8px; width: 88%; }
+  body { margin-right: 14%; }  
+}
