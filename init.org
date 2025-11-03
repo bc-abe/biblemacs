@@ -1,0 +1,708 @@
+#+TITLE: BibleMacs Configuration
+#+AUTHOR: BibleMacs
+#+DESCRIPTION: A complete Emacs configuration for Bible study
+#+PROPERTY: header-args:emacs-lisp :tangle ~/.emacs.d/init.el
+
+* Introduction
+
+This is the main configuration file for BibleMacs, an Emacs distribution designed for Bible study.
+All configuration is written in literate programming style using Org-mode.
+
+To apply changes:
+1. Edit this file
+2. Save it (C-x C-s)
+3. Tangle it with C-c C-v t (or M-x org-babel-tangle)
+4. Restart Emacs
+
+* Early Initialization
+
+** Performance Optimizations
+
+#+begin_src emacs-lisp
+;;; init.el --- BibleMacs Configuration -*- lexical-binding: t -*-
+
+;; Set garbage collection threshold higher for better performance
+(setq gc-cons-threshold (* 100 1024 1024)
+      read-process-output-max (* 1024 1024))
+
+;; Restore after startup
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (setq gc-cons-threshold (* 2 1024 1024))))
+
+;; Set BibleMacs home directory
+(defvar biblemacs-home
+  (or (getenv "BIBLEMACS_HOME")
+      (expand-file-name "~/biblemacs"))
+  "The root directory of BibleMacs installation.")
+
+;; Add BibleMacs paths
+(defvar biblemacs-bible-dir (expand-file-name "bible" biblemacs-home))
+(defvar biblemacs-notes-dir (expand-file-name "notes" biblemacs-home))
+(defvar biblemacs-projects-dir (expand-file-name "projects" biblemacs-home))
+(defvar biblemacs-site-dir (expand-file-name "site" biblemacs-home))
+(defvar biblemacs-resources-dir (expand-file-name "resources" biblemacs-home))
+#+end_src
+
+* Package Management
+
+** Bootstrap straight.el
+
+#+begin_src emacs-lisp
+;; Bootstrap straight.el
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 6))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+
+;; Use straight.el for use-package
+(straight-use-package 'use-package)
+(setq straight-use-package-by-default t)
+#+end_src
+
+* UI Configuration
+
+** Basic UI Settings
+
+#+begin_src emacs-lisp
+;; Disable unnecessary UI elements
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+
+;; Enable line numbers
+(global-display-line-numbers-mode 1)
+(setq display-line-numbers-type 'relative)
+
+;; Disable line numbers for some modes
+(dolist (mode '(org-mode-hook
+                term-mode-hook
+                shell-mode-hook
+                eshell-mode-hook
+                dashboard-mode-hook))
+  (add-hook mode (lambda () (display-line-numbers-mode 0))))
+
+;; Set font
+(when (member "CascadiaCode Nerd Font" (font-family-list))
+  (set-face-attribute 'default nil :font "CascadiaCode Nerd Font" :height 120))
+
+;; Smooth scrolling
+(setq scroll-conservatively 101
+      scroll-margin 5
+      scroll-preserve-screen-position t)
+
+;; Highlight current line
+(global-hl-line-mode 1)
+
+;; Show matching parentheses
+(show-paren-mode 1)
+
+;; Auto-save and backup settings
+(setq auto-save-default t
+      make-backup-files t
+      backup-directory-alist `(("." . ,(expand-file-name "backups" user-emacs-directory)))
+      auto-save-file-name-transforms `((".*" ,(expand-file-name "auto-saves/" user-emacs-directory) t)))
+#+end_src
+
+** Theme Configuration
+
+#+begin_src emacs-lisp
+;; Install themes
+(use-package almost-mono-themes
+  :straight t)
+
+(use-package doom-themes
+  :straight t)
+
+;; Theme toggle variables
+(defvar biblemacs-current-theme 'dark
+  "Current theme mode - 'dark or 'light")
+
+(defvar biblemacs-dark-theme 'almost-mono-black
+  "The dark theme to use")
+
+(defvar biblemacs-light-theme 'almost-mono-white
+  "The light theme to use")
+
+;; Theme toggle function
+(defun biblemacs-toggle-theme ()
+  "Toggle between dark and light themes."
+  (interactive)
+  (if (eq biblemacs-current-theme 'dark)
+      (progn
+        (setq biblemacs-current-theme 'light)
+        (load-theme biblemacs-light-theme t))
+    (setq biblemacs-current-theme 'dark)
+    (load-theme biblemacs-dark-theme t))
+  (message "Switched to %s theme" biblemacs-current-theme))
+
+;; Load default theme
+(load-theme biblemacs-dark-theme t)
+#+end_src
+
+** Dashboard
+
+#+begin_src emacs-lisp
+(use-package dashboard
+  :straight t
+  :config
+  (setq dashboard-banner-logo-title "BIBLEMACS"
+        dashboard-startup-banner 'ascii
+        dashboard-center-content t
+        dashboard-set-heading-icons nil
+        dashboard-set-file-icons nil
+        dashboard-items '((recents  . 5)
+                         (bookmarks . 5))
+        dashboard-footer-messages '("Emacs for Bible Study")
+        dashboard-footer-icon "")
+  
+  ;; Custom dashboard buttons
+  (setq dashboard-navigator-buttons
+        `(((,(all-the-icons-octicon "book" :height 1.0 :v-adjust 0.0)
+            "Bible"
+            "Open Bible folder"
+            (lambda (&rest _) (dired biblemacs-bible-dir)))
+           (,(all-the-icons-octicon "note" :height 1.0 :v-adjust 0.0)
+            "Notes"
+            "Open Notes folder"
+            (lambda (&rest _) (find-file (expand-file-name "index.org" biblemacs-notes-dir))))
+           (,(all-the-icons-octicon "project" :height 1.0 :v-adjust 0.0)
+            "Projects"
+            "Open Projects folder"
+            (lambda (&rest _) (find-file (expand-file-name "index.org" biblemacs-projects-dir))))
+           (,(all-the-icons-octicon "mortar-board" :height 1.0 :v-adjust 0.0)
+            "Resources"
+            "Open Resources folder"
+            (lambda (&rest _) (dired biblemacs-resources-dir)))
+           (,(all-the-icons-octicon "checklist" :height 1.0 :v-adjust 0.0)
+            "Tasks"
+            "View all tasks"
+            (lambda (&rest _) (org-agenda nil "t"))))))
+  
+  ;; ASCII banner
+  (setq dashboard-ascii-banner-content
+"╔══════════════════════════════════════════════════╗
+║ ____  _ _     _      __  __                      ║
+║|  _ \\(_) |   | |    |  \\/  |                     ║
+║| |_) |_| |__ | | ___| \\  / | __ _  ___ ___       ║
+║|  _ <| | '_ \\| |/ _ \\ |\\/| |/ _` |/ __/ __|      ║
+║| |_) | | |_) | |  __/ |  | | (_| | (__\\__ \\      ║
+║|____/|_|_.__/|_|\\___|_|  |_|\\__,_|\\___|___/      ║
+║                                                  ║
+║           E M A C S   F O R   B I B L E         ║
+║                   S T U D Y                      ║
+╚══════════════════════════════════════════════════╝")
+  
+  (dashboard-setup-startup-hook))
+
+;; Ensure dashboard shows on startup
+(setq initial-buffer-choice (lambda () (get-buffer-create "*dashboard*")))
+#+end_src
+
+* Core Packages
+
+** Vertico & Consult
+
+#+begin_src emacs-lisp
+;; Vertico - vertical completion UI
+(use-package vertico
+  :straight t
+  :init
+  (vertico-mode))
+
+;; Orderless - better completion style
+(use-package orderless
+  :straight t
+  :config
+  (setq completion-styles '(orderless basic)
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles partial-completion)))))
+
+;; Marginalia - annotations in completions
+(use-package marginalia
+  :straight t
+  :init
+  (marginalia-mode))
+
+;; Consult - enhanced commands
+(use-package consult
+  :straight t
+  :bind (("C-s" . consult-line)
+         ("C-x b" . consult-buffer)
+         ("M-y" . consult-yank-pop))
+  :config
+  (setq consult-narrow-key "<"))
+#+end_src
+
+** Which-key
+
+#+begin_src emacs-lisp
+(use-package which-key
+  :straight t
+  :init
+  (which-key-mode)
+  :config
+  (setq which-key-idle-delay 0.3))
+#+end_src
+
+** General (Key bindings)
+
+#+begin_src emacs-lisp
+(use-package general
+  :straight t
+  :config
+  (general-create-definer biblemacs-leader
+    :prefix "C-SPC"
+    :non-normal-prefix "C-SPC")
+  
+  ;; Global leader key bindings
+  (biblemacs-leader
+    ""     '(nil :which-key "Leader")
+    "SPC"  '(execute-extended-command :which-key "M-x")
+    
+    ;; Files
+    "f"    '(:ignore t :which-key "Files")
+    "ff"   '(find-file :which-key "Find file")
+    "fr"   '(consult-recent-file :which-key "Recent files")
+    "fs"   '(save-buffer :which-key "Save file")
+    
+    ;; Bible
+    "b"    '(:ignore t :which-key "Bible")
+    "bf"   '(biblemacs-bible-find :which-key "Find in Bible")
+    "bi"   '(biblemacs-bible-insert :which-key "Insert verse")
+    "bl"   '(biblemacs-bible-link :which-key "Link to verse")
+    "bs"   '(biblemacs-bible-search :which-key "Search Bible")
+    
+    ;; Notes
+    "n"    '(:ignore t :which-key "Notes")
+    "nf"   '(biblemacs-note-find :which-key "Find note")
+    "nn"   '(biblemacs-note-new :which-key "New note")
+    "nl"   '(biblemacs-note-link :which-key "Link to note")
+    
+    ;; Projects
+    "p"    '(:ignore t :which-key "Projects")
+    "pf"   '(biblemacs-project-find :which-key "Find project")
+    "pn"   '(biblemacs-project-new :which-key "New project")
+    
+    ;; Links
+    "l"    '(:ignore t :which-key "Links")
+    "ls"   '(org-store-link :which-key "Store link")
+    "li"   '(org-insert-link :which-key "Insert link")
+    
+    ;; Inductive Study
+    "i"    '(:ignore t :which-key "Inductive")
+    "is"   '(biblemacs-inductive-study :which-key "Start study")
+    
+    ;; Theme
+    "t"    '(:ignore t :which-key "Toggle")
+    "tt"   '(biblemacs-toggle-theme :which-key "Toggle theme")
+    
+    ;; Help
+    "h"    '(:ignore t :which-key "Help")
+    "ht"   '(biblemacs-tutorial :which-key "Tutorial")
+    "hh"   '(helpful-at-point :which-key "Help at point")))
+#+end_src
+
+** Org Mode Configuration
+
+#+begin_src emacs-lisp
+(use-package org
+  :straight (:type built-in)
+  :config
+  (setq org-directory biblemacs-notes-dir
+        org-default-notes-file (expand-file-name "notes.org" biblemacs-notes-dir)
+        org-return-follows-link t
+        org-hide-emphasis-markers t
+        org-startup-indented t
+        org-pretty-entities t
+        org-ellipsis " ▾"
+        org-agenda-files (list biblemacs-notes-dir biblemacs-projects-dir))
+  
+  ;; Open links with Enter
+  (org-defkey org-mode-map (kbd "RET") 'org-open-at-point)
+  
+  ;; Org bullets
+  (use-package org-bullets
+    :straight t
+    :hook (org-mode . org-bullets-mode)
+    :config
+    (setq org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●"))))
+#+end_src
+
+* Bible Study Functions
+
+** Bible Navigation
+
+#+begin_src emacs-lisp
+;; List of Bible books
+(defvar biblemacs-bible-books
+  '(;; Old Testament
+    "Genesis" "Exodus" "Leviticus" "Numbers" "Deuteronomy"
+    "Joshua" "Judges" "Ruth" "1 Samuel" "2 Samuel"
+    "1 Kings" "2 Kings" "1 Chronicles" "2 Chronicles"
+    "Ezra" "Nehemiah" "Esther" "Job" "Psalms" "Proverbs"
+    "Ecclesiastes" "Song of Solomon" "Isaiah" "Jeremiah"
+    "Lamentations" "Ezekiel" "Daniel" "Hosea" "Joel"
+    "Amos" "Obadiah" "Jonah" "Micah" "Nahum"
+    "Habakkuk" "Zephaniah" "Haggai" "Zechariah" "Malachi"
+    ;; New Testament
+    "Matthew" "Mark" "Luke" "John" "Acts"
+    "Romans" "1 Corinthians" "2 Corinthians" "Galatians"
+    "Ephesians" "Philippians" "Colossians"
+    "1 Thessalonians" "2 Thessalonians"
+    "1 Timothy" "2 Timothy" "Titus" "Philemon"
+    "Hebrews" "James" "1 Peter" "2 Peter"
+    "1 John" "2 John" "3 John" "Jude" "Revelation")
+  "List of all Bible books.")
+
+(defun biblemacs-bible-find ()
+  "Find and open a Bible book."
+  (interactive)
+  (let* ((book (completing-read "Select book: " biblemacs-bible-books))
+         (file (expand-file-name (concat book ".org") biblemacs-bible-dir)))
+    (if (file-exists-p file)
+        (find-file file)
+      (message "Bible file not found: %s" file))))
+
+(defun biblemacs-bible-search ()
+  "Search for a word or phrase in the Bible."
+  (interactive)
+  (let* ((scope (completing-read "Search in: " '("All" "Old Testament" "New Testament" "Select Books")))
+         (query (read-string "Search for: "))
+         (books (cond
+                 ((string= scope "All") biblemacs-bible-books)
+                 ((string= scope "Old Testament") (seq-take biblemacs-bible-books 39))
+                 ((string= scope "New Testament") (seq-drop biblemacs-bible-books 39))
+                 ((string= scope "Select Books")
+                  (completing-read-multiple "Select books (comma separated): " biblemacs-bible-books)))))
+    (consult-ripgrep biblemacs-bible-dir query)))
+
+(defun biblemacs-bible-insert ()
+  "Insert a Bible verse reference at point."
+  (interactive)
+  (let* ((book (completing-read "Book: " biblemacs-bible-books))
+         (chapter (read-string "Chapter: "))
+         (verse (read-string "Verse(s): "))
+         (reference (format "%s %s:%s" book chapter verse)))
+    (insert reference)))
+
+(defun biblemacs-bible-link ()
+  "Insert a link to a Bible verse."
+  (interactive)
+  (let* ((book (completing-read "Book: " biblemacs-bible-books))
+         (chapter (read-string "Chapter: "))
+         (verse (read-string "Verse: "))
+         (file (expand-file-name (concat book ".org") biblemacs-bible-dir))
+         (link (format "[[file:%s::%s:%s][%s %s:%s]]" file chapter verse book chapter verse)))
+    (insert link)))
+#+end_src
+
+** Notes Management
+
+#+begin_src emacs-lisp
+(defun biblemacs-note-new ()
+  "Create a new note with automatic indexing."
+  (interactive)
+  (let* ((title (read-string "Note title: "))
+         (filename (concat (format-time-string "%Y%m%d%H%M%S") "-"
+                          (replace-regexp-in-string "[^a-zA-Z0-9]" "-" title) ".org"))
+         (filepath (expand-file-name filename biblemacs-notes-dir)))
+    (find-file filepath)
+    (insert (format "#+TITLE: %s\n#+DATE: %s\n#+TAGS: \n\n" 
+                    title 
+                    (format-time-string "%Y-%m-%d %H:%M")))
+    (save-buffer)
+    (biblemacs-update-index 'notes)))
+
+(defun biblemacs-note-find ()
+  "Find a note in the notes directory."
+  (interactive)
+  (let ((default-directory biblemacs-notes-dir))
+    (call-interactively 'find-file)))
+
+(defun biblemacs-note-link ()
+  "Insert a link to a note."
+  (interactive)
+  (let* ((notes (directory-files biblemacs-notes-dir nil "\\.org$"))
+         (note (completing-read "Select note: " notes))
+         (filepath (expand-file-name note biblemacs-notes-dir)))
+    (insert (format "[[file:%s][%s]]" filepath (file-name-sans-extension note)))))
+
+(defun biblemacs-update-index (type)
+  "Update the index file for TYPE (notes or projects)."
+  (let* ((dir (if (eq type 'notes) biblemacs-notes-dir biblemacs-projects-dir))
+         (index-file (expand-file-name "index.org" dir))
+         (files (directory-files dir nil "^[^.].*\\.org$")))
+    (with-temp-file index-file
+      (insert (format "#+TITLE: %s Index\n#+DATE: %s\n\n"
+                      (capitalize (symbol-name type))
+                      (format-time-string "%Y-%m-%d %H:%M")))
+      (insert "* Index\n\n")
+      (dolist (file files)
+        (unless (string= file "index.org")
+          (let ((title (or (biblemacs-get-org-title (expand-file-name file dir))
+                          (file-name-sans-extension file))))
+            (insert (format "- [[file:%s][%s]]\n" file title))))))))
+
+(defun biblemacs-get-org-title (file)
+  "Get the #+TITLE from an org FILE."
+  (when (file-exists-p file)
+    (with-temp-buffer
+      (insert-file-contents file)
+      (goto-char (point-min))
+      (when (re-search-forward "^#\\+TITLE: \\(.+\\)$" nil t)
+        (match-string 1)))))
+#+end_src
+
+** Projects Management
+
+#+begin_src emacs-lisp
+(defun biblemacs-project-new ()
+  "Create a new project."
+  (interactive)
+  (let* ((type (completing-read "Project type: " '("Article" "Sermon" "Lecture" "Study")))
+         (title (read-string "Project title: "))
+         (filename (concat (format-time-string "%Y%m%d") "-"
+                          (downcase type) "-"
+                          (replace-regexp-in-string "[^a-zA-Z0-9]" "-" title) ".org"))
+         (filepath (expand-file-name filename biblemacs-projects-dir)))
+    (find-file filepath)
+    (insert (format "#+TITLE: %s\n#+TYPE: %s\n#+DATE: %s\n#+AUTHOR: \n#+TAGS: \n\n"
+                    title type (format-time-string "%Y-%m-%d")))
+    (insert (format "* %s: %s\n\n" type title))
+    (save-buffer)
+    (biblemacs-update-index 'projects)))
+
+(defun biblemacs-project-find ()
+  "Find a project in the projects directory."
+  (interactive)
+  (let ((default-directory biblemacs-projects-dir))
+    (call-interactively 'find-file)))
+#+end_src
+
+** Inductive Bible Study
+
+#+begin_src emacs-lisp
+(defun biblemacs-inductive-study ()
+  "Start an inductive Bible study session."
+  (interactive)
+  (let* ((book (completing-read "Book: " biblemacs-bible-books))
+         (chapter (read-string "Chapter: "))
+         (verses (read-string "Verses (e.g., 1-10): "))
+         (passage (format "%s %s:%s" book chapter verses))
+         (lab-file (expand-file-name "lab.org" biblemacs-projects-dir)))
+    ;; Open or create lab.org
+    (find-file lab-file)
+    (goto-char (point-max))
+    ;; Add study template
+    (insert (format "\n* Inductive Study: %s\n" passage))
+    (insert (format "  :PROPERTIES:\n  :DATE: %s\n  :END:\n\n" 
+                    (format-time-string "%Y-%m-%d %H:%M")))
+    (insert "** Observation\n")
+    (insert "   /What does the text say?/\n\n")
+    (insert "   - Key words:\n")
+    (insert "   - Repeated themes:\n")
+    (insert "   - Important verbs:\n")
+    (insert "   - Cause and effect:\n\n")
+    (insert "** Interpretation\n")
+    (insert "   /What does the text mean?/\n\n")
+    (insert "   - Context:\n")
+    (insert "   - Cross references:\n")
+    (insert "   - Original language insights:\n")
+    (insert "   - Main point:\n\n")
+    (insert "** Application\n")
+    (insert "   /How does this apply to me?/\n\n")
+    (insert "   - Personal reflection:\n")
+    (insert "   - Action steps:\n")
+    (insert "   - Prayer points:\n\n")
+    (insert "** Notes\n\n")
+    (save-buffer)
+    (message "Inductive study template created for %s" passage)))
+#+end_src
+
+** Bible Notes Integration
+
+#+begin_src emacs-lisp
+(defun biblemacs-insert-bible-note ()
+  "Insert a note reference in a Bible file."
+  (interactive)
+  (let* ((chapter (read-string "Chapter: "))
+         (verse (read-string "Verse: "))
+         (note (read-string "Note: "))
+         (reference (read-string "Cross-reference (optional): ")))
+    (insert (format "<<%s:%s>> " chapter verse))
+    (insert "#+begin_notes\n")
+    (insert (format "+%s.%s+ - %s\n" verse "1" note))
+    (when (not (string-empty-p reference))
+      (insert (format "  See: [[file:%s][%s]]\n" reference reference)))
+    (insert "#+end_notes\n")))
+#+end_src
+
+* Publishing Configuration
+
+#+begin_src emacs-lisp
+(use-package ox-html
+  :straight (:type built-in)
+  :config
+  (setq org-html-validation-link nil
+        org-html-head-include-scripts nil
+        org-html-head-include-default-style nil
+        org-html-head "<link rel=\"stylesheet\" type=\"text/css\" href=\"/static/style.css\" />"))
+
+(setq org-publish-project-alist
+      `(("bible"
+         :base-directory ,biblemacs-bible-dir
+         :base-extension "org"
+         :publishing-directory ,(expand-file-name "bible" biblemacs-site-dir)
+         :recursive t
+         :publishing-function org-html-publish-to-html
+         :headline-levels 4
+         :auto-preamble t
+         :auto-sitemap t
+         :sitemap-title "Bible Books")
+        
+        ("notes"
+         :base-directory ,biblemacs-notes-dir
+         :base-extension "org"
+         :publishing-directory ,(expand-file-name "notes" biblemacs-site-dir)
+         :recursive t
+         :publishing-function org-html-publish-to-html
+         :auto-preamble t
+         :auto-sitemap t
+         :sitemap-title "Notes Index")
+        
+        ("projects"
+         :base-directory ,biblemacs-projects-dir
+         :base-extension "org"
+         :publishing-directory ,(expand-file-name "projects" biblemacs-site-dir)
+         :recursive t
+         :publishing-function org-html-publish-to-html
+         :auto-preamble t
+         :auto-sitemap t
+         :sitemap-title "Projects Index")
+        
+        ("static"
+         :base-directory ,(expand-file-name "static" biblemacs-site-dir)
+         :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
+         :publishing-directory ,(expand-file-name "static" biblemacs-site-dir)
+         :recursive t
+         :publishing-function org-publish-attachment)
+        
+        ("biblemacs" :components ("bible" "notes" "projects" "static"))))
+
+(defun biblemacs-publish-all ()
+  "Publish all BibleMacs content to HTML."
+  (interactive)
+  (org-publish-all t)
+  (message "Published to %s" biblemacs-site-dir))
+#+end_src
+
+* Additional Packages
+
+#+begin_src emacs-lisp
+;; All the icons for better visual experience
+(use-package all-the-icons
+  :straight t
+  :if (display-graphic-p))
+
+;; Helpful - better help buffers
+(use-package helpful
+  :straight t
+  :bind
+  ([remap describe-function] . helpful-callable)
+  ([remap describe-variable] . helpful-variable)
+  ([remap describe-key] . helpful-key))
+
+;; Rainbow delimiters for better code readability
+(use-package rainbow-delimiters
+  :straight t
+  :hook (prog-mode . rainbow-delimiters-mode))
+
+;; Ripgrep for fast searching
+(use-package rg
+  :straight t
+  :config
+  (rg-enable-default-bindings))
+#+end_src
+
+* Tutorial System
+
+#+begin_src emacs-lisp
+(defun biblemacs-tutorial ()
+  "Open the BibleMacs tutorial."
+  (interactive)
+  (let ((tutorial-file (expand-file-name "tutorial.org" biblemacs-resources-dir)))
+    (if (file-exists-p tutorial-file)
+        (progn
+          (find-file tutorial-file)
+          (read-only-mode 1))
+      (message "Tutorial file not found. Creating one...")
+      (biblemacs-create-tutorial))))
+
+(defun biblemacs-create-tutorial ()
+  "Create the tutorial file if it doesn't exist."
+  (let ((tutorial-file (expand-file-name "tutorial.org" biblemacs-resources-dir)))
+    (with-temp-file tutorial-file
+      (insert "#+TITLE: BibleMacs Tutorial\n")
+      (insert "#+AUTHOR: BibleMacs Team\n\n")
+      (insert "* Welcome to BibleMacs!\n\n")
+      (insert "This tutorial will help you get started with BibleMacs.\n\n")
+      (insert "* Key Bindings\n\n")
+      (insert "Leader key: Control + Space\n\n")
+      (insert "** Essential Commands\n")
+      (insert "- ~C-SPC f f~ : Find file\n")
+      (insert "- ~C-SPC b f~ : Find Bible book\n")
+      (insert "- ~C-SPC n n~ : New note\n")
+      (insert "- ~C-SPC i s~ : Start inductive study\n")
+      (insert "- ~C-SPC t t~ : Toggle theme\n\n")
+      (insert "* Getting Started\n\n")
+      (insert "1. Place your Bible .org files in the ~/biblemacs/bible/ folder\n")
+      (insert "2. Create your first note with ~C-SPC n n~\n")
+      (insert "3. Start an inductive study with ~C-SPC i s~\n"))
+    (find-file tutorial-file)
+    (read-only-mode 1)))
+
+;; First-time setup check
+(defun biblemacs-first-time-setup ()
+  "Check if this is the first time running BibleMacs."
+  (let ((setup-file (expand-file-name ".setup-complete" user-emacs-directory)))
+    (unless (file-exists-p setup-file)
+      (biblemacs-tutorial)
+      (with-temp-file setup-file
+        (insert "Setup completed on: " (format-time-string "%Y-%m-%d %H:%M")))
+      (message "Welcome to BibleMacs! Press C-h t for the tutorial anytime."))))
+
+(add-hook 'emacs-startup-hook 'biblemacs-first-time-setup)
+#+end_src
+
+* Final Configuration
+
+#+begin_src emacs-lisp
+;; Enable automatic reloading of changed files
+(global-auto-revert-mode t)
+
+;; Save place in files
+(save-place-mode 1)
+
+;; Recent files
+(recentf-mode 1)
+(setq recentf-max-menu-items 25
+      recentf-max-saved-items 25)
+
+;; Remember window configurations
+(winner-mode 1)
+
+;; Final message
+(message "BibleMacs loaded successfully! Press C-SPC h t for tutorial.")
+
+(provide 'init)
+;;; init.el ends here
+#+end_src

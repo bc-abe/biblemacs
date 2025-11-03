@@ -1,0 +1,53 @@
+#+TITLE: Genesis
+#+AUTHOR: Berean Study Bible
+#+DESCRIPTION: The Book of Genesis
+
+* Genesis 1
+
+** The Creation
+
+<<1:1>> *1* In the beginning God created the heavens and the earth.
+
+<<1:2>> *2* Now the earth was formless and void, and darkness was over the surface of the deep. And the Spirit of God was hovering over the surface of the waters.
+
+<<1:3>> *3* And God said, "Let there be light," and there was light.
+
+<<1:4>> *4* And God saw that the light was good, and He separated the light from the darkness.
+
+<<1:5>> *5* God called the light "day," and the darkness He called "night." And there was evening, and there was morning—the first day.
+
+<<1:6>> *6* And God said, "Let there be an expanse between the waters, to separate the waters from the waters."
+
+<<1:7>> *7* So God made the expanse and separated the waters beneath it from the waters above. And it was so.
+
+<<1:8>> *8* God called the expanse "sky." And there was evening, and there was morning—the second day.
+
+#+begin_notes
++1.1+ - The Hebrew word for "created" (bara) implies creation from nothing (ex nihilo)
++1.2+ - The Spirit "hovering" uses the same word as an eagle hovering over its young (Deuteronomy 32:11)
+#+end_notes
+
+* Genesis 2
+
+** The Seventh Day
+
+<<2:1>> *1* Thus the heavens and the earth were completed in all their vast array.
+
+<<2:2>> *2* By the seventh day God had finished the work He had been doing; so on that day He rested from all His work.
+
+<<2:3>> *3* Then God blessed the seventh day and sanctified it, because on that day He rested from all the work of creation that He had accomplished.
+
+** The Creation of Man
+
+<<2:4>> *4* This is the account of the heavens and the earth when they were created, in the day that the LORD God made them.
+
+<<2:5>> *5* Now no shrub of the field had yet appeared on the earth, nor had any plant of the field sprouted; for the LORD God had not yet sent rain upon the earth, and there was no man to cultivate the ground.
+
+<<2:6>> *6* But springs welled up from the earth and watered the whole surface of the ground.
+
+<<2:7>> *7* Then the LORD God formed man from the dust of the ground and breathed the breath of life into his nostrils, and the man became a living being.
+
+#+begin_notes
++2.7+ - The word "formed" (yatsar) is used of a potter forming clay
++2.7+ - See also: [[file:Job.org::33:4][Job 33:4]], [[file:1_Corinthians.org::15:45][1 Corinthians 15:45]]
+#+end_notes
