@@ -507,9 +507,7 @@ More history saving features
           (setq line-spacing -0.1)
           (olivetti-mode 1 )
           (visual-line-mode 1)
-          (evil-escape-mode 1)
           (org-sticky-header-mode)
-          (evil-org-mode 1)
           (org-appear-mode)
            (lambda () (progn
            (setq left-margin-width 10)
@@ -1357,11 +1355,11 @@ Also sets the foreground to match the default background, making the original ta
 :CUSTOM_ID: reading-mode
 :END:
 #+begin_src emacs-lisp
-    (use-package  hl-sentence)
+(use-package hl-sentence)
 
-    (with-eval-after-load 'evil-maps
-    (define-key evil-normal-state-map (kbd "m") 'evil-org-forward-sentence)
-    (define-key evil-normal-state-map (kbd "M") 'evil-org-backward-sentence))
+;; Define forward/backward sentence movement on M-m and M-M
+(global-set-key (kbd "M-m") #'forward-sentence)
+(global-set-key (kbd "M-M") #'backward-sentence)
 
   (defun my-hl-sentence-mode-hook ()
   "Adjust scroll-margin based on hl-sentence-mode."
