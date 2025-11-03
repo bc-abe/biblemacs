@@ -10,3 +10,19 @@
 #+end_src
 
 
+This is my Emacs Setup for studying the Bible. 
+
+To start install
+- [[https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/CascadiaCode.zip][CaskaydiaCove Nerd Font]]
+- [[https://github.com/googlefonts/roboto-2/releases/download/v2.138/roboto-unhinted.zip][Roboto Font]]
+- [[https://git-scm.com/book/en/v2/Getting-Started-Installing-Git][Git]]
+- Optional: [[https://bibletime.info/][BibleTime]] (Download the Berean Standard Bible in BibleTime)
+
+  To get this up and running tangle the file code/init.org and ~C-c C-v t~
+  
+  Or, run this in your terminal after cloning the repo:
+
+~emacs --batch --eval "(require 'org)" --eval "(org-babel-tangle-file \"~/biblemacs/code/init.org\")"~
+
+
+I'll have more stuff later, but that's what I have for now.
