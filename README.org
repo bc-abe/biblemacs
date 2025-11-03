@@ -18,11 +18,105 @@ To start install
 - [[https://git-scm.com/book/en/v2/Getting-Started-Installing-Git][Git]]
 - Optional: [[https://bibletime.info/][BibleTime]] (Download the Berean Standard Bible in BibleTime)
 
-  To get this up and running tangle the file code/init.org and ~C-c C-v t~
-  
-  Or, run this in your terminal after cloning the repo:
+To get this up and running tangle the file code/init.org with ~C-c C-v t~
+ 
+Or, run this in your terminal after cloning the repo:
 
 ~emacs --batch --eval "(require 'org)" --eval "(org-babel-tangle-file \"~/biblemacs/code/init.org\")"~
 
 
 I'll have more stuff later, but that's what I have for now.
+
+Here are keybindings to start. Leader key is ~C-SPC~. So go a bible reference is ~Control + Spacebar~, then ~b~, and ~f~, put Acts 2:38. The ta-da! you should be at Acts 2:38.
+
+Note: to use ~sword-insert-ref~ and other ~sword~ commands, install BibleTime.
+
+  #+begin_src 
+  "a"  '(:ignore t :which-key "avy/ace")
+  "as" '(ace-swap-window :which-key "Swap Window")
+  "ad" '(ace-delete-window :which-key "Delete Window")
+  "aw" '(ace-window :which-key "Switch to Window")
+  "ag" '(avy-goto-char-2 :which-key "Go to Character (Avy)")
+  "bm" '(consult-buffer :which-key "Consult Buffer")
+  "bp" '(previous-buffer :which-key "Previous Buffer")
+  "bC" '(clone-indirect-buffer :which-key "Clone Buffer")
+  "bc" '(clone-indirect-buffer-other-window :which-key "Clone Indirect Buffer")
+  "bf" '(bm/biblesearch :which-key "Bible Search")
+  "bl" '(bm/biblelink :which-key "Bible Link")
+  "bg" '(org-mark-ring-goto :which-key "Org Mark Goto")
+  "bi" '(sword-insert-ref :which-key "Insert BSB Link")
+  "dd" '(dired-org-files :which-key "Only Org")
+  
+  "er" '(eval-region :which-key "Eval Region")
+  "eb" '(eval-buffer :which-key "Eval Buffer")
+  "ec" '(embrace-commmander :which-key "Embrace Commander")
+  "ea" '(embrace-add :which-key "Embrace Add")
+  "ed" '(embrace-delete :which-key "Embrace Delete")
+  
+  "ei" '(isearch-emoji-by-name :which-key "Insert Emoji")
+  "el" '(emoji-insert :which-key "Emoji List")
+  
+  "fs" '(save-buffer :which-key "Save Buffer")
+  "ff" '(find-file :which-key "Find File")
+  "j"  '(ace-link :which-key "Link Jump")
+
+  "gn" '(bm/init    :which-key "Init")
+  "go" '(bm/notes   :which-key "Notes")
+  "gp" '(bm/projects  :which-key "Projects")
+
+  "ls" '(org-store-link :which-key "Store Link")
+  "li" '(org-insert-link :which-key "Insert Link")
+  "ld" '(bm/org-insert-link :which-key "Links with find-file")
+
+  "nd" '(bm/org-nota-dir :which-key "Open Notes Dir")
+  "nf" '(bm/org-nota-find-file :which-key "Find Notes")
+  "ni" '(bm/org-nota-insert :which-key "Insert Notes")
+  "nm" '(bm/org-nota-insert :which-key "Insert Notes From Marked Dir")
+
+  "on" '(org-toggle-narrow-to-subtree :which-key "Narrow to Subtree")
+  "os" '(org-insert-structure-template :which-key "Org Structure Template")
+  "og" '(consult-org-heading :which-key "Consult Org Heading")
+
+  "qq" '(kill-emacs :which-key "Kill Emacs"))
+  
+  "pf" '(org-publish-current-file  :which-key "Publish Project")
+  "pp" '(org-publish-project       :which-key "Publish Project")
+  "pP" '(bm/org-publish-all        :which-key "Publish Everything"))
+
+  "um" '(hide-mode-line-mode :which-key "Hide Mode Link")
+  "uv" '(variable-pitch-mode :which-key "Variable Pitch Mode")
+  "ur" '(vr/replace :which-key "VR/Replace")
+  "ut" '(set-default-font-height :which-key "Set Font Height")
+  "uf" '(toggle-frame-fullscreen :which-key "Fullscreen")
+  "ug" '(avy-goto-char-2 :which-key "Go to Char")
+  "us" '(scroll-bar-mode :which-key "Scroll Bar Mode")
+  "ui" '(org-indent-mode :which-key "Org Indent")
+
+  "t"  '(:ignore t :which-key "Tabs / Tangle")
+  "tt" '(tab-new :which-key "New Tab")
+  "tl" '(tab-next :which-key "Next Tab")
+  "th" '(tab-previous :which-key "Next Previous")
+  "tc" '(tab-close :which-key "Close Tab")
+  "tb" '(org-babel-tangle :which-key "Tangle"))
+  
+  "wa" '(ace-window t :which-key "Ace window")
+  "wb" '(split-window-below :which-key "Split Window below")
+  "wc" '(make-frame t :which-key "create frame")
+  "wd" '(window-delete :which-key "Delete window")
+  "we" '(whisper-run :which-key "Speech To Text")
+  "wd" '(delete-window :which-key "Delete Window")
+  "wf" '(make-frame :which-key "Create a new frame")
+  "wo" '(wg-open-workgroup :which-key "Open Workgroup")
+  "ws" '(split-window-right :which-key "Split window")
+  "wj" '(window-down :which-key "Switch to window down")
+  "wk" '(window-up :which-key "Switch to window up")
+  "wh" '(window-left :which-key "switch to window left")
+  "wl" '(window-right :which-key "Switch to window right")
+  "ws" '(window-split :which-key "Split window")
+  "wv" '(window-vsplit :which-key "Split window vertically")
+  "wr" '(delete-frame t :which-key "Delete Frame")
+  "wq" '(delete-frame :which-key "Delete frame")
+  "ww" '(wg-create-workgroup :which-key "Create Workgroup"))
+  "x" '(execute-extended-command :which-key "M-x")
+  #+end_src
+
