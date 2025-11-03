@@ -68,14 +68,14 @@ BibleMacs transforms Emacs into a powerful, integrated Bible study environment. 
 
 ```bash
 # Clone and install in one command
-curl -fsSL https://raw.githubusercontent.com/yourusername/biblemacs/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/bc-abe/biblemacs/main/install.sh | bash
 ```
 
 ### Manual Installation
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/biblemacs.git ~/biblemacs
+git clone https://github.com/bc-abe/biblemacs.git ~/biblemacs
 
 # 2. Run the setup script
 cd ~/biblemacs
@@ -89,7 +89,7 @@ biblemacs
 
 ```bash
 # Clone to your preferred location
-git clone https://github.com/yourusername/biblemacs.git /path/to/biblemacs
+git clone https://github.com/bc-abe/biblemacs.git ~/
 
 # Run installer with custom directory
 ./install.sh --dir /path/to/biblemacs
