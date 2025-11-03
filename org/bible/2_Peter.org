@@ -1,6 +1,6 @@
 #+title: 2 Peter
 #+HTML: <h1> The Second Letter of <br> P E T E R </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** 2 Peter 1
 *** A Greeting from Peter (1 Peter 1:1--2)

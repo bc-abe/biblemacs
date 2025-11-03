@@ -1,7 +1,7 @@
 // Base URL (adjust local path)
 const BASE_URL = window.location.hostname === "abepeters.com" 
     ? "https://abepeters.com/bible/"
-    : "file:///home/abep/studio/site/bible/";
+    : "./";  // Current directory (bible folder)
 
 let modalCreated = false;
 
@@ -35,7 +35,7 @@ function createAndShowBibleModal() {
                 gap:15px;
             ">
                 <h2 style="margin:0; font-size:1.2em;">Go to Bible Reference</h2>
-                <input id="bibleInput" type="text" placeholder="Genesis, Genesis 4, Genesis 5:7" style="
+                <input id="bibleInput" type="text" placeholder="Acts, Acts 2, Acts 2:38" style="
                     padding:10px;
                     border:none;
                     border-radius:6px;
@@ -100,9 +100,11 @@ function createAndShowBibleModal() {
             }
             let url = `${BASE_URL}${book}.html`;
             if (chapter && verse) {
+                // Navigate to specific verse (e.g., #1-2)
                 url += `#${chapter}-${verse}`;
             } else if (chapter) {
-                url += `#${book.toLowerCase()}-${chapter}`;
+                // Navigate to first verse of chapter (e.g., #1-1)
+                url += `#${chapter}-1`;
             }
             // Navigate in same tab
             window.location.href = url;

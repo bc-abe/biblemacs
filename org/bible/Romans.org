@@ -1,6 +1,6 @@
 #+title: Romans
 #+HTML: <h1> The Letter to the <br> R O M A N </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Romans 1
 *** Paul Greets the Saints in Rome
@@ -525,38 +525,18 @@ will never be put to shame.” \\
 <<10:3>> *3* Because they were ignorant of God's righteousness and sought to establish their own, they did not submit to God's righteousness. 
 <<10:4>> *4* For Christ is the end of the law, to bring righteousness to everyone who believes.
 
-<<10:5>> *5* For concerning the righteousness that is by the law, Moses writes: “The man who does these things will live by them.” +1+
-#+begin_notes
-+5.1+ - [[file:Leviticus.org::18:5][Leviticus 18:5]]
-#+end_notes
-<<10:6>> *6* But the righteousness that is by faith says: “Do not say in your heart, +1+ ‘Who will ascend into heaven?' +2+ (that is, to bring Christ down) 
-#+begin_notes
-+6.1+ - [[file:Deuteronomy.org::9:4][Deuteronomy 9:4]] 
-
-+6.2+ - [[file:Deuteronomy.org::30:12][Deuteronomy 30:12]] 
-#+end_notes
+<<10:5>> *5* For concerning the righteousness that is by the law, Moses writes: “The man who does these things will live by them.” 
+<<10:6>> *6* But the righteousness that is by faith says: “Do not say in your heart, ‘Who will ascend into heaven?' (that is, to bring Christ down) 
 <<10:7>> *7* or, ‘Who will descend into the Abyss?' (that is, to bring Christ up from the dead).”
-#+begin_notes
-+7.1+ - [[file:Deuteronomy.org::30:13][Deuteronomy 30:13]] 
-#+end_notes
 
-<<10:8>> *8* But what does it say? “The word is near you; it is in your mouth and in your heart,” +1+ that is, the word of faith we are proclaiming: 
-#+begin_notes
-+8.1+ - [[file:Deuteronomy.org::30:14][Deuteronomy 30:14]] 
-#+end_notes
+<<10:8>> *8* But what does it say? “The word is near you; it is in your mouth and in your heart,” that is, the word of faith we are proclaiming: 
 <<10:9>> *9* that if you confess with your mouth, “Jesus is Lord,” and believe in your heart that God raised Him from the dead, you will be saved. 
 <<10:10>> *10* For with your heart you believe and are justified, and with your mouth you confess and are saved.
 
-<<10:11>> *11* It is just as the Scripture says: “Anyone who believes in Him will never be put to shame.” +1+
-#+begin_notes
-+1+ - [[file:Isaiah.org::28:16][Isaiah 28:16]] 
-#+end_notes
+<<10:11>> *11* It is just as the Scripture says: “Anyone who believes in Him will never be put to shame.” 
 
 <<10:12>> *12* For there is no difference between Jew and Greek: The same Lord is Lord of all, and gives richly to all who call on Him, 
 <<10:13>> *13* for, “Everyone who calls on the name of the Lord will be saved.”
-#+begin_notes
-+1+ - [[file:Joel.org::2:32][Joel 2:32]] 
-#+end_notes
 
 <<10:14>> *14* How then can they call on the One in whom they have not believed? And how can they believe in the One of whom they have not heard? And how can they hear without someone to preach? 
 <<10:15>> *15* And how can they preach unless they are sent? As it is written: “How beautiful are the feet of those who bring good news!”
@@ -586,16 +566,9 @@ to a disobedient and obstinate people.” \\
 *** A Remnant Chosen by Grace
 [[html-class:drop][11]]
 
-<<11:1>> I ask then, did God reject His people? Certainly not! I am an Israelite myself, a descendant of Abraham, from the tribe of Benjamin. +1+
+<<11:1>> I ask then, did God reject His people? Certainly not! I am an Israelite myself, a descendant of Abraham, from the tribe of Benjamin. 
 <<11:2>> *2* God did not reject His people, whom He foreknew. Do you not know what the Scripture says about Elijah, how he appealed to God against Israel:
-<<11:3>> *3* “Lord, they have killed Your prophets and torn down Your altars. I am the only one left, and they are seeking my life as well”? +2+
-
-#+begin_notes
-1.1 - cf. [[*9:6][Romans 9:6]]
-
-3.1 - [[file:~/studio/site/bible/1_Kings.org::*19:10][1 Kings 19:10]]
-
-#+end_notes
+<<11:3>> *3* “Lord, they have killed Your prophets and torn down Your altars. I am the only one left, and they are seeking my life as well”? 
 
 <<11:4>> *4* And what was the divine reply to him? “I have reserved for Myself seven thousand men who have not bowed the knee to Baal.”
 
@@ -608,22 +581,14 @@ to a disobedient and obstinate people.” \\
 “God gave them a spirit of stupor, \\
 eyes that could not see, \\
 and ears that could not hear, \\
-to this very day.” +1+ \\
-
-#+begin_notes
-+8.1+ - [[file:Deuteronomy.org::*29:4][Deuteronomy 29:4]]; [[file:Isaiah.org::*29:10][Isaiah 29:10]].
-#+end_notes
+to this very day.” \\
 
 <<11:9>> *9* And David says:
 
 “May their table become a snare and a trap, \\
 a stumbling block and a retribution to them. \\
 <<11:10>> *10* May their eyes be darkened so they cannot see, \\
-and their backs be bent forever.” +1+ \\
-
-#+begin_notes
-+10.1+ - [[file:~/studio/site/bible/Psalms.org::*69:22][Psalm 69:22-23]]
-#+end_notes
+and their backs be bent forever.”  \\
 
 *** The Ingrafting of the Gentiles
 

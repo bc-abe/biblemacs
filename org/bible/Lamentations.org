@@ -1,6 +1,6 @@
 #+title: Lamentations
 #+HTML: <h1> The Book of <br> L A M E N T A T I O N S </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Lamentations 1
 *** How Lonely Lies the City! (2 Kings 24:10--17)

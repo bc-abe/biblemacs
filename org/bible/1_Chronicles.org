@@ -1,12 +1,11 @@
 #+title: 1 Chronicles
 #+HTML: <h1> The Book of <br> F I R S T <br> C H R O N I C L E S </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../
 
 ** 1 Chronicles 1
 *** From Adam to Abraham (Genesis 10:1--32; Genesis 11:10--26)
 [[html-class:drop][1]]
 
-<<1:1>> Adam, Seth, Enosh,
 
 <<1:2>> *2* Kenan, Mahalalel, Jared,
 

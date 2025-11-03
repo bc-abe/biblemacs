@@ -1,6 +1,6 @@
 #+title: 1 Thessalonians
 #+HTML: <h1> The First Letter to the <br> T H E S S A L O N I A N S </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** 1 Thessalonians 1
 *** Greetings to the Thessalonians (2 Thessalonians 1:1--4)

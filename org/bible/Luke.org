@@ -1,6 +1,6 @@
 #+title: Luke
 #+HTML: <h1> The Gospel According to <br> L U K E </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Luke 1
 *** Dedication to Theophilus (Acts 1:1--3)

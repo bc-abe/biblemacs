@@ -1,6 +1,6 @@
 #+title: Haggi
 #+HTML: <h1> The Book of <br> H A G G A I </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Haggai 1
 *** A Call to Rebuild the Temple (Ezra 5:1--5)

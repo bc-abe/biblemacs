@@ -1,6 +1,6 @@
 #+title: Mark
 #+HTML: <h1> The Gospel According to <br> M A R K </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Mark 1
 *** The Mission of John the Baptist (Luke 3:1--22; John 1:19--34)

@@ -1,6 +1,6 @@
 #+title: James
 #+HTML: <h1> The Letter of <br> J A M E S </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
  
 ** James 1
 *** A Greeting from James (Jude 1:1--2)

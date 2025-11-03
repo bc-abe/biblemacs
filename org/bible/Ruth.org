@@ -1,6 +1,6 @@
 #+title: Ruth
 #+HTML: <h1> The Book of <br> R U T H </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Ruth 1
 

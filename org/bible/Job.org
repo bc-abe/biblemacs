@@ -1,6 +1,6 @@
 #+title: Job
 #+HTML: <h1> The Book of <br> J O B </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Job 1
 *** Job's Character and Wealth (James 5:7--12)

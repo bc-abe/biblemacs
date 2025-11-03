@@ -1,6 +1,6 @@
 #+title: 1 Kings
 #+HTML: <h1> The Book of <br> F I R S T <br> K I N G S </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** 1 Kings 1
 [[html-class:drop][1]]

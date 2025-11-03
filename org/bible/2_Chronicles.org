@@ -1,6 +1,6 @@
 #+title: 2 Chronicles
 #+HTML: <h1> The Book of <br> S E C O N D <br> C H R O N I C L E S </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** 2 Chronicles 1
 *** Solomon's Prayer for Wisdom (Psalm 45:1--17; Psalm 72:1--20)

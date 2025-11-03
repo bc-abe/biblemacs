@@ -1,6 +1,6 @@
 #+title: Titus 
 #+HTML: <h1> The Letter to <br> T I T U S </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Titus 1
 *** Paul's Greeting to Titus (2 Corinthians 8:16--24)

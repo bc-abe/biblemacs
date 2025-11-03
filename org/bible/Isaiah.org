@@ -1,6 +1,6 @@
 #+title: Isaiah
 #+HTML: <h1> The Book of <br> I S A I A H </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Isaiah 1
 *** Judah's Rebellion (2 Chronicles 28:5--15)

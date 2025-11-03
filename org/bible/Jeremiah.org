@@ -1,6 +1,6 @@
 #+title: Jeremiah
 #+HTML: <h1> The Book of <br> J E R E M I A H </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Jeremiah 1
 

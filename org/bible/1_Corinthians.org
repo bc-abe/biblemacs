@@ -1,6 +1,6 @@
 #+title: 1 Corinthians
 #+HTML: <h1> The First Letter to the <br> C O R I N T H I A N S </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../bible.setup
 
 ** 1 Corinthians 1
 [[html-class:drop][1]]

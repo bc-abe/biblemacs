@@ -1,7 +1,7 @@
 
 #+title: Ecclesiates
 #+HTML: <h1> The Book of <br> E C C L E S I A S T E S </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 
 ** Ecclesiastes 1

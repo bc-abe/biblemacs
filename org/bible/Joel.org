@@ -1,6 +1,6 @@
 #+title: Joel
 #+HTML: <h1> The Book of <br> J O E L </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Joel 1
 *** The Invasion of Locusts

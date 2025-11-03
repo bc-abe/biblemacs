@@ -1,6 +1,6 @@
 #+title: Ezra
 #+HTML: <h1> The Book of <br> E Z R A </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Ezra 1
 *** The Proclamation of Cyrus (2 Chronicles 36:22--23; Isaiah 45:1--25)

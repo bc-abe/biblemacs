@@ -1,6 +1,6 @@
 #+title: Numbers
 #+HTML: <h1> The Book of <br> N U M B E R S </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Numbers 1
 *** The First Census of Israel (Numbers 26:1--4)

@@ -1,4 +1,4 @@
-#+SETUPFILE: ../static/setup/bible.setup
+#+SETUPFILE: ../setup/bible.setup
 #+title: Galatians
 #+HTML: <h1> The Epistle <br> to the <br> G A L A T I A N S </h1>
 * Galatians 1

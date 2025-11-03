@@ -1,6 +1,6 @@
 #+title: Micah
 #+HTML: <h1> The Book of <br> M I C A H </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Micah 1
 *** Judgment to Come (Isaiah 7:17--25)

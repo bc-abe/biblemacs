@@ -1,6 +1,6 @@
 #+title: Revelation
 #+HTML: <h1> The <br> R E V E L A T I O N <br> of John</h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Revelation 1
 *** Prologue (Daniel 12:1--13)

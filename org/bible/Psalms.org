@@ -1,4 +1,4 @@
-#+SETUPFILE: ../static/setup/bible.setup
+#+SETUPFILE: ../setup/bible.setup
 #+title: Psalms
 #+HTML: <h1> The Book of <br> P S A L M S </h1>
 
@@ -230,13 +230,7 @@ or the son of man that You care for him?  \\
 You crowned him with glory and honor.  \\
 <<8:6>> *6* You made him ruler of the works of Your hands; \\
 You have placed everything under his feet:  \\
-#+begin_notes
-6.1 - [[file:~/studio/site/bible/Hebrews.org::2:6][Hebrews 2:6-8]]
-#+end_notes
-<<8:7>> *7* all sheep and oxen, \\
-and even the beasts of the field,  \\
-<<8:8>> *8* the birds of the air and the fish of the sea, \\
-all that swim the paths of the seas.  \\
+#+begin_notesijk  \\
 <<8:9>> *9* O YHWH, our Lord, \\
 how majestic is Your name in all the earth!  \\
 

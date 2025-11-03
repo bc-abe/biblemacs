@@ -1,6 +1,6 @@
 #+title: Galatians
 #+HTML: <h1> The Letter to the <br> G A L A T I A N S </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Galatians 1
 *** Paul's Greeting to the Galatians

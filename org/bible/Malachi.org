@@ -1,6 +1,6 @@
 #+title: Malachi
 #+HTML: <h1> The Book of <br> M A L A C H I </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Malachi 1
 *** The LORD's Love for Israel (Genesis 25:19--28; Romans 9:6--29)

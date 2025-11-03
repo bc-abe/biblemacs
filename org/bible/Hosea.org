@@ -1,6 +1,6 @@
 #+title: Hosea
 #+HTML: <h1> The Book of <br> H O S E A </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Hosea 1
 *** Hosea's Wife and Children

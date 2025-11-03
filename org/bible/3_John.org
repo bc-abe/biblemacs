@@ -1,6 +1,6 @@
 #+title: 3 John
 #+HTML: <h1> The Third Letter of <br> J O H N </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** 3 John 1
 *** A Greeting from the Elder ([[file:2_998.htm][2 John 1:1--3]])

@@ -1,6 +1,6 @@
 #+title: Deuteronomy
 #+HTML: <h1> The Book of <br> D E U T E R O N O M Y </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Deuteronomy 1
 *** The Command to Leave Horeb (Exodus 33:1--6)

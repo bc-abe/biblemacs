@@ -1,6 +1,6 @@
 #+title: Zephaniah
 #+HTML: <h1> The Book of <br> Z E P H A N I A H </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Zephaniah 1
 *** Zephaniah Prophesies Judgment on Judah (Matthew 13:36--43)

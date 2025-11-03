@@ -1,6 +1,6 @@
 #+title: Hebrews
 #+HTML: <h1> The Letter to the <br> H E B R E W S </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Hebrews 1
 *** The Supremacy of the Son (Colossians 1:15--23)

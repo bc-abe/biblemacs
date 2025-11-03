@@ -1,6 +1,6 @@
 #+title: 1 Corinthians
 #+HTML: <h1> The Second Letter to the <br> C O R I N T H I A N S </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** 2 Corinthians 1
 *** Paul Greets the Corinthians (Acts 18:1--11; 1 Corinthians 1:1--3)

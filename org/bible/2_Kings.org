@@ -1,6 +1,6 @@
 #+title: 2 Kings
 #+HTML: <h1> The Book of <br> S E C O N D <br> K I N G S </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** 2 Kings 1
 *** Elijah Denounces Ahaziah (1 Kings 22:51--53)

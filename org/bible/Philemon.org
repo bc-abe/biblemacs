@@ -1,6 +1,6 @@
 #+title: Philemon
 #+HTML: <h1> The Letter to <br> P H I L E M O N </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Philemon 1
 *** Greetings from Paul and Timothy (Philippians 1:1--2; Colossians 1:1--2)

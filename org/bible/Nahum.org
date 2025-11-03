@@ -1,6 +1,6 @@
 #+title: Nahum
 #+HTML: <h1> The Book of <br> N A H U M </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Nahum 1
 *** The Burden against Nineveh (Jonah 1:1--3)

@@ -30,8 +30,20 @@ I'll have more stuff later, but that's what I have for now.
 Here are keybindings to start. Leader key is ~Alt-SPC~. In Emacs, ~Alt~ is ~M~. So go a bible reference is ~Alt + Spacebar~, then ~b~, and ~f~, put Acts 2:38. The ta-da! you should be at Acts 2:38.
 
 Note: to use ~sword-insert-ref~ and other ~sword~ commands, install BibleTime.
+ 
+Here are the basics
 
-  #+begin_src 
+#+begin_src 
+M-SPC f f find file
+M-SPC f s save file
+M-SPC b f find Bible Reference
+M-SPC b s search whole bible
+M-SPC b l insert bible link
+M-SPC n f create/find note
+M-SPC n i insert note link
+#+end_src
+
+#+begin_src 
   "a"  '(:ignore t :which-key "avy/ace")
   "as" '(ace-swap-window :which-key "Swap Window")
   "ad" '(ace-delete-window :which-key "Delete Window")
@@ -41,7 +53,7 @@ Note: to use ~sword-insert-ref~ and other ~sword~ commands, install BibleTime.
   "bp" '(previous-buffer :which-key "Previous Buffer")
   "bC" '(clone-indirect-buffer :which-key "Clone Buffer")
   "bc" '(clone-indirect-buffer-other-window :which-key "Clone Indirect Buffer")
-  "bf" '(bm/biblesearch :which-key "Bible Search")
+  "bf" '(bm/biblefind :which-key "Bible Find")
   "bl" '(bm/biblelink :which-key "Bible Link")
   "bg" '(org-mark-ring-goto :which-key "Org Mark Goto")
   "bi" '(sword-insert-ref :which-key "Insert BSB Link")

@@ -1,6 +1,6 @@
 #+title: Joshua
 #+HTML: <h1> The Book of <br> J O S H U A </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 ** Joshua 1
 [[html-class:drop][1]]
 <<1:1>> Now after the death of His servant Moses, the LORD spoke to Joshua son of Nun, Moses' assistant, saying,

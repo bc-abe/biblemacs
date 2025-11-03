@@ -1,6 +1,6 @@
 #+title: 2 John
 #+HTML: <h1> The Second Letter of <br> J O H N </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** 2 John 1
 

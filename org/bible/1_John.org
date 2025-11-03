@@ -1,6 +1,6 @@
 #+title: 1 John
 #+HTML: <h1> The First Letter of <br> J O H N </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** 1 John 1
 *** The Word of Life (Luke 24:36--49; John 20:19--23)

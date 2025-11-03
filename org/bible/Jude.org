@@ -1,6 +1,6 @@
 #+title: Jude
 #+HTML: <h1> The Letter of <br> J O H N </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Jude 1
 

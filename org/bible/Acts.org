@@ -1,6 +1,6 @@
 #+title: Acts
 #+HTML: <h1> The Book of <br> A C T S </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Acts 1
 *** Prologue (Luke 1:1--4)

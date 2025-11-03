@@ -1,6 +1,6 @@
 #+title: Leviticus
 #+HTML: <h1> The Book of <br> Leviticus </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 ** Leviticus 1
 [[html-class:drop][1]]
 <<1:1>> Then the LORD called to Moses and spoke to him from the Tent of Meeting, saying,

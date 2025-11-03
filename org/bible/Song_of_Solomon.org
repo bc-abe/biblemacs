@@ -1,6 +1,6 @@
 #+title: Song of Solomon
 #+HTML: <h1> The Song of <br> S O L O M O N </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Song of Solomon 1
 *** The Bride Confesses Her Love (Ephesians 5:22--33; 1 Peter 3:1--7)

@@ -1,6 +1,6 @@
 #+title: John
 #+HTML: <h1> The Gospel According to <br> J O H N </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** John 1
 *** The Beginning (Genesis 1:1--2; Hebrews 11:1--3)

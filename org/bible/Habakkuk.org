@@ -1,6 +1,6 @@
 #+title: H A B A K K U K
 #+HTML: <h1> The Book of <br> H A B A K K U K </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Habakkuk 1
 *** Habakkuk's First Complaint

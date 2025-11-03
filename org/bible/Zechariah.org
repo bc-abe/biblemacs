@@ -1,6 +1,6 @@
 #+title: Zechariah
 #+HTML: <h1> The Book of <br> Z E C H A R I A </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Zechariah 1
 

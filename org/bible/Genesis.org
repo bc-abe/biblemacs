@@ -1,6 +1,6 @@
 #+title: Genesis
 #+HTML: <h1> The Book of <br> G E N E S I S </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 * Genesis 1
 

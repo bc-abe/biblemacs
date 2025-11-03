@@ -1,6 +1,6 @@
 #+title: Proverbs
 #+HTML: <h1> The Book of <br> P R O V E R B S </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Proverbs 1
 *** The Beginning of Knowledge (Proverbs 9:1--12)

@@ -1,6 +1,6 @@
 #+title: Ephesians
 #+HTML: <h1> The Letter to the <br> E P H E S I A N S </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Ephesians 1
 *** Paul's Greeting to the Ephesians (Acts 19:8--12; Revelation 2:1--7)

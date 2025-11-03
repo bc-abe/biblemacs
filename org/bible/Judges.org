@@ -1,6 +1,6 @@
 #+title: Judges
 #+HTML: <h1> The Book of <br> J U D G E S </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Judges 1
 *** The Conquest of Canaan Proceeds (Joshua 13:1--7)

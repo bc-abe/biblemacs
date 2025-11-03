@@ -1,6 +1,6 @@
 #+title: Daniel
 #+HTML: <h1> The Book of <br> D A N I E L </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
  
 ** Daniel 1
 *** Daniel Removed to Babylon

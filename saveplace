@@ -1,0 +1,9 @@
+;;; -*- coding: utf-8; mode: lisp-data -*-
+(("/home/abep/" (dired-filename . "/home/abep/biblemacs"))
+ ("/home/abep/biblemacs/public/bible/"
+  (dired-filename . "/home/abep/biblemacs/public/bible/Galatian.html"))
+ ("/home/abep/biblemacs/public/"
+  (dired-filename . "/home/abep/biblemacs/public/bible"))
+ ("/home/abep/biblemacs/"
+  (dired-filename . "/home/abep/biblemacs/README.org"))
+ ("/home/abep/biblemacs/README.org" . 26))

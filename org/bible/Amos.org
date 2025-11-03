@@ -1,6 +1,6 @@
 #+title: Amos
 #+HTML: <h1> The Book of <br> A M O S </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Amos 1
 *** Judgment on Israel's Neighbors (Jeremiah 12:14--17)

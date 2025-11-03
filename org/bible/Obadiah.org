@@ -1,6 +1,6 @@
 #+title: Obadiah
 #+HTML: <h1> The Book of <br> A M O S </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Obadiah 1
 

@@ -1,6 +1,6 @@
 #+title: Nehemiah
 #+HTML: <h1> The Book of <br> N E H E M I A H </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Nehemiah 1
 *** Nehemiah's Prayer (Deuteronomy 30:1--10)

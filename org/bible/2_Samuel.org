@@ -1,6 +1,6 @@
 #+title: 2 Samuel
 #+HTML: <h1> The Book of <br> S E C O N D <br> S A M U E L </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** 2 Samuel 1
 *** Saul's Death Reported to David (1 Samuel 31:1--6; 1 Chronicles 10:1--6)

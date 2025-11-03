@@ -1,6 +1,6 @@
 #+title: Esther
 #+HTML: <h1> The Book of <br> E S T H E R </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Esther 1
 *** Xerxes' Royal Feast

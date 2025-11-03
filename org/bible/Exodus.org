@@ -1,6 +1,6 @@
 #+title: Exodus
 #+HTML: <h1> The Book of <br> E X O D U S </h1>
-#+setupfile: ../static/setup/bible.setup
+#+setupfile: ../setup/bible.setup
 
 ** Exodus 1
 
